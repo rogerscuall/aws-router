@@ -61,8 +61,8 @@ func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *e
 	if len(routeFilters) == 0 {
 		filters = []types.Filter{
 			{
-				Name:   aws.String("route-search.longest-prefix-match"),
-				Values: []string{},
+				Name:   aws.String("state"),
+				Values: []string{"active"},
 			},
 		}
 	}
