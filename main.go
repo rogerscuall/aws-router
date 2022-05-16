@@ -37,12 +37,21 @@ func main() {
 	for _, tgw := range result.TransitGateways {
 		tgwIDList = append(tgwIDList, *tgw.TransitGatewayId)
 	}
-	fmt.Println(tgwIDList)
+	fmt.Println("List of TGW ID", tgwIDList)
 
 	// Get all the Route Tables for all the TGWs
 	inputTgwRouteTable := awsrouter.TgwRouteTableInputFilter(tgwIDList)
 	resultTgwRouteTable, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable)
 
+	// a test
+	inputTgwRouteTable1 := awsrouter.TgwRouteTableInputFilter([]string{})
+	resultTgwRouteTable1, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable1)
+	fmt.Println("This is a test")
+	for _, tgwRouteTable := range resultTgwRouteTable1.TransitGatewayRouteTables {
+		
+		fmt.Println(*tgwRouteTable.TransitGatewayRouteTableId)
+	}
+	fmt.Println("This is a test")
 	// Get a list of all the TGW Route Tables IDs.
 	var TgwRouteTableList []string
 	for _, tgwRouteTable := range resultTgwRouteTable.TransitGatewayRouteTables {
@@ -59,7 +68,7 @@ func main() {
 			// Convert into an optional function pass as a parameter to adorn the map key
 			f := func() (mapKey string) {
 				mapKey = *routeTable.TransitGatewayRouteTableId
-				for _, route := range routeTable.Tags {	
+				for _, route := range routeTable.Tags {
 					if *route.Key == "Name" {
 						return *route.Value
 					}

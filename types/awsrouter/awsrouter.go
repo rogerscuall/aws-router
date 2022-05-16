@@ -31,7 +31,11 @@ func GetTgw(ctx context.Context, api AwsRouter, input *ec2.DescribeTransitGatewa
 
 // TgwRouteTableInputFilter returns a filter for the DescribeTransitGatewayRouteTables.
 // tgwIDs is a list of Transit Gateway IDs.
+// and empty tgwIDs creates a filter that returns all Transit Gateway Route Tables in the account.
 func TgwRouteTableInputFilter(tgwIDs []string) *ec2.DescribeTransitGatewayRouteTablesInput {
+	if len(tgwIDs) == 0 {
+		return &ec2.DescribeTransitGatewayRouteTablesInput{}
+	}
 	var filter []types.Filter
 	filter = append(filter, types.Filter{
 		Name:   aws.String("transit-gateway-id"),
@@ -44,6 +48,7 @@ func TgwRouteTableInputFilter(tgwIDs []string) *ec2.DescribeTransitGatewayRouteT
 }
 
 // GetTgwRouteTables returns a list of the Transit Gateway Route Tables that match the input filter.
+// and empty input filter creates a filter that returns all Transit Gateway Route Tables in the account.
 func GetTgwRouteTables(ctx context.Context, api AwsRouter, input *ec2.DescribeTransitGatewayRouteTablesInput) (*ec2.DescribeTransitGatewayRouteTablesOutput, error) {
 	return api.DescribeTransitGatewayRouteTables(ctx, input)
 }
@@ -76,7 +81,7 @@ func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *e
 	return input
 }
 
-// GetTgwRoutes returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
+//GetTgwRoutes returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
 func GetTgwRoutes(ctx context.Context, api AwsRouter, input *ec2.SearchTransitGatewayRoutesInput) (*ec2.SearchTransitGatewayRoutesOutput, error) {
 	return api.SearchTransitGatewayRoutes(ctx, input)
 }
