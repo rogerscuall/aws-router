@@ -30,7 +30,7 @@ func (t TgwDescriberImpl) DescribeTransitGateways(ctx context.Context, params *e
 	}, nil
 }
 
-func (t TgwDescriberImpl) DescribeTransitGatewayRouteTables(ctx context.Context, params *ec2.DescribeTransitGatewayRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayRouteTablesOutput, error) {	
+func (t TgwDescriberImpl) DescribeTransitGatewayRouteTables(ctx context.Context, params *ec2.DescribeTransitGatewayRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayRouteTablesOutput, error) {
 	return &ec2.DescribeTransitGatewayRouteTablesOutput{
 		TransitGatewayRouteTables: []types.TransitGatewayRouteTable{
 			{
@@ -39,7 +39,7 @@ func (t TgwDescriberImpl) DescribeTransitGatewayRouteTables(ctx context.Context,
 					{Key: aws.String("Name"),
 						Value: aws.String("test")},
 				},
-				State:       "available",
+				State: "available",
 			},
 		},
 	}, nil
@@ -50,19 +50,18 @@ func (t TgwDescriberImpl) SearchTransitGatewayRoutes(ctx context.Context, params
 		Routes: []types.TransitGatewayRoute{
 			{
 				DestinationCidrBlock: aws.String("10.0.1.0/24"),
-				State:                 "active",
-				Type: 				"static",
+				State:                "active",
+				Type:                 "static",
 			},
 			{
 				DestinationCidrBlock: aws.String("10.0.2.0/24"),
-				State:                 "active",
-				Type: 				"static",
+				State:                "active",
+				Type:                 "static",
 			},
 		},
 	}, nil
 
 }
-
 
 func TestGetTgw(t *testing.T) {
 	type args struct {
@@ -180,86 +179,30 @@ func TestTgwRouteTableInputFilter(t *testing.T) {
 	}
 }
 
-// func TestGetTgwRouteTables(t *testing.T) {
-//  	type args struct {
-//  		ctx   context.Context
-//  		api   AwsRouter
-//  		input *ec2.DescribeTransitGatewayRouteTablesInput
-//  	}
-//  	tests := []struct {
-//  		name    string
-//  		args    args
-//  		want    *ec2.DescribeTransitGatewayRouteTablesOutput
-// 		wantErr bool
-//  	}{
-//  		{
-//  			"Filtered",
-//  			args{
-//  				context.TODO(),
-//  				TgwRouteTableDescriberImpl{},
-//  				&ec2.DescribeTransitGatewayRouteTablesInput{
-//  					Filters: []types.Filter{
-//  						{
-//  							Name:   aws.String("transit-gateway-id"),
-//  							Values: []string{"tgw-0d7f9b0c", "tgw-0d7f9b0d"},
-//  						},
-//  					},
-// 				},
-//  			},
-//  			&ec2.DescribeTransitGatewayRouteTablesOutput{
-//  				TransitGatewayRouteTables: []types.TransitGatewayRouteTable{
-//  					{
-//  						TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0c"),
-//  						Tags: []types.Tag{
-//  							{
-//  								Key:   aws.String("Name"),
-//  								Value: aws.String("test"),
-//  							},
-//  						},
-//  						State: "available",
-//  					},
-//  				},
-//  			}, false},
-//  		{
-//  			"NotFiltered",
-//  			args{
-//  				context.TODO(),
-//  				TgwRouteTableDescriberImpl{},
-//  				&ec2.DescribeTransitGatewayRouteTablesInput{},
-//  			},
-//  			&ec2.DescribeTransitGatewayRouteTablesOutput{
-//  				TransitGatewayRouteTables: []types.TransitGatewayRouteTable{
-//  					{
-//  						TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0c"),
-//  						Tags: []types.Tag{
-//  							{
-//  								Key:   aws.String("Name"),
-//  								Value: aws.String("test"),
-//  							},
-//  						},
-//  						State: "available",
-//  					},
-//  					{
-//  						TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0d"),
-//  						Tags: []types.Tag{
-//  							{
-//  								Key:   aws.String("Name"),
-//  								Value: aws.String("test"),
-//  							},
-//  						},
-//  						State: "available",
-//  					},
-//  				},
-//  			}, false},
-//  	}
-//  	for _, tt := range tests {
-//  		t.Run(tt.name, func(t *testing.T) {
-//  			got, err := GetTgwRouteTables(tt.args.ctx, tt.args.api, tt.args.input)
-//  			if (err != nil) != tt.wantErr {
-//  				t.Errorf("GetTgwRouteTables() error = %v, wantErr %v", err, tt.wantErr)
-//  				return
-// 			}
-//  			if !reflect.DeepEqual(got, tt.want) {
-//  				t.Errorf("GetTgwRouteTables() = %v, want %v", got, tt.want)
-//  			}
-// 	})
+func TestGetTgwRouteTables(t *testing.T) {
+	type args struct {
+		ctx   context.Context
+		api   AwsRouter
+		input *ec2.DescribeTransitGatewayRouteTablesInput
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *ec2.DescribeTransitGatewayRouteTablesOutput
+		wantErr bool
+	}{
+		//TODO
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetTgwRouteTables(tt.args.ctx, tt.args.api, tt.args.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTgwRouteTables() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetTgwRouteTables() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
