@@ -1,0 +1,20 @@
+image:
+  name: "golang:1.18.2-buster"
+  entrypoint:
+    - "/usr/bin/env"
+    - "PATH=/go/bin:/usr/local/go/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+stages:
+  - tests
+  - build
+
+unittest:
+  stage: test
+  script:
+    - go install github.com/go-task/task/v3/cmd/task@latest
+    - task test
+
+build:
+  stage: build
+  script:
+    - go install github.com/go-task/task/v3/cmd/task@latest
+    - task buildall
