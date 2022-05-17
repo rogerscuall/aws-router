@@ -191,8 +191,27 @@ func TestGetTgwRouteTables(t *testing.T) {
 		want    *ec2.DescribeTransitGatewayRouteTablesOutput
 		wantErr bool
 	}{
-		//TODO
-	}
+		{
+			"test1",
+			args{
+				context.TODO(),
+				TgwDescriberImpl{},
+				&ec2.DescribeTransitGatewayRouteTablesInput{},
+			},
+			&ec2.DescribeTransitGatewayRouteTablesOutput{
+				TransitGatewayRouteTables: []types.TransitGatewayRouteTable{
+					{
+						TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0c"),
+						Tags: []types.Tag{
+							{Key: aws.String("Name"),
+								Value: aws.String("test")},
+						},
+						State:       "available",
+					}},
+			},
+			false,
+		},
+			}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetTgwRouteTables(tt.args.ctx, tt.args.api, tt.args.input)
