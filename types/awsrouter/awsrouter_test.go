@@ -261,3 +261,53 @@ func TestTgwSearchRoutesInputFilter(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTgwRoutes(t *testing.T) {
+	type args struct {
+		ctx   context.Context
+		api   AwsRouter
+		input *ec2.SearchTransitGatewayRoutesInput
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *ec2.SearchTransitGatewayRoutesOutput
+		wantErr bool
+	}{
+		{
+			"test1",
+			args{
+				context.TODO(),
+				TgwDescriberImpl{},
+				&ec2.SearchTransitGatewayRoutesInput{},
+			},
+			&ec2.SearchTransitGatewayRoutesOutput{
+				Routes: []types.TransitGatewayRoute{
+					{
+						DestinationCidrBlock: aws.String("10.0.1.0/24"),
+						State:                "active",
+						Type:                 "static",
+					},
+					{
+						DestinationCidrBlock: aws.String("10.0.2.0/24"),
+						State:                "active",
+						Type:                 "static",
+					},
+				},
+			},
+			false,
+		},
+	}
+	for _, tt := range tests { 
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetTgwRoutes(tt.args.ctx, tt.args.api, tt.args.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTgwRoutes() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetTgwRoutes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
