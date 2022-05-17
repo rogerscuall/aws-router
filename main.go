@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "go-aws-routing/cmd"
+import "gitlab.presidio.com/rgomez/aws-router/cmd"
 
 func main() {
 	cmd.Execute()
