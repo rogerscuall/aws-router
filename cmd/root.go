@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"os"
 
-	"go-aws-routing/types/awsrouter"
+	"gitlab.presidio.com/rgomez/aws-router/types/awsrouter"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
