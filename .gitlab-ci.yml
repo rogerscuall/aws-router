@@ -24,3 +24,4 @@ build:
     paths:
       - "awsrouters"
       - "awsrouters.exe"
+      - "awsrouters-linux"
