@@ -9,10 +9,13 @@ tasks:
       - go test -race -v ./...
   build:
     cmds:
-      - go build -o awsrouter *.go
+      - GOOS=darwin go build -o awsrouters *.go
   buildwindows:
     cmds:
-      - GOOS=windows GOARCH=amd64 go build -o awsrouter.exe *.go
+      - GOOS=windows GOARCH=amd64 go build -o awsrouters.exe *.go
+  buildlinux:
+    cmds:
+      - GOOS=linux GOARCH=amd64 go build -o awsrouters-linux
   buildall:
     deps:
       - build
