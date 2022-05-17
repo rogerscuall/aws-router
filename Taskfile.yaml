@@ -1,6 +1,19 @@
-version: '3'
+version: "3"
 
 tasks:
   test:
     cmds:
       - go test -v ./...
+  race:
+    cmds:
+      - go test -race -v ./...
+  build:
+    cmds:
+      - go build -o awsrouter *.go
+  buildwindows:
+    cmds:
+      - GOOS=windows GOARCH=amd64 go build -o awsrouter.exe *.go
+  buildall:
+    deps:
+      - build
+      - buildwindows
