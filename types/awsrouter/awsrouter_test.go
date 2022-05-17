@@ -206,12 +206,12 @@ func TestGetTgwRouteTables(t *testing.T) {
 							{Key: aws.String("Name"),
 								Value: aws.String("test")},
 						},
-						State:       "available",
+						State: "available",
 					}},
 			},
 			false,
 		},
-			}
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetTgwRouteTables(tt.args.ctx, tt.args.api, tt.args.input)
@@ -221,6 +221,42 @@ func TestGetTgwRouteTables(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetTgwRouteTables() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTgwSearchRoutesInputFilter(t *testing.T) {
+	type args struct {
+		tgwRtID      string
+		routeFilters []types.Filter
+	}
+	tests := []struct {
+		name string
+		args args
+		want *ec2.SearchTransitGatewayRoutesInput
+	}{
+		{
+			"empty",
+			args{
+				"rtb-0d7f9b0c",
+				[]types.Filter{},
+			},
+			&ec2.SearchTransitGatewayRoutesInput{
+				Filters: []types.Filter{
+					{
+						Name:   aws.String("state"),
+						Values: []string{"active"},
+					},
+				},
+				TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0c"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := TgwSearchRoutesInputFilter(tt.args.tgwRtID); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TgwSearchRoutesInputFilter() = %v, want %v", got, tt.want)
 			}
 		})
 	}
