@@ -61,25 +61,53 @@ to quickly create a Cobra application.`,
 		client := ec2.NewFromConfig(cfg)
 		tgwInputFilter := awsrouter.TgwInputFilter([]string{})
 		resultTgw, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
-		tgws := resultTgw.TransitGateways
-		for _, tgw := range tgws {
-			fmt.Println("The TGW is: ", tgw.TransitGatewayId)
+		var tgws []*awsrouter.Tgw
+		for _, tgw := range resultTgw.TransitGateways {
+			newTgw := &awsrouter.Tgw{
+				TgwId:   *tgw.TransitGatewayId,
+				TgwData: tgw,
+			}
+			tgws = append(tgws, newTgw)
 		}
+		// for _, tgw := range tgws {
+		// 	fmt.Println("The TGW is: ", tgw.TgwId)
+		// }
 
 		// Get all the route tables
-		inputTgwRouteTable := awsrouter.TgwRouteTableInputFilter([]string{})
-		resultTgwRouteTable, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable)
-		routeTables := resultTgwRouteTable.TransitGatewayRouteTables
-		for _, routeTable := range routeTables {
-			fmt.Println("The route table is: ", routeTable.TransitGatewayRouteTableId)
+
+		for _, tgw := range tgws {
+			inputTgwRouteTable := awsrouter.TgwRouteTableInputFilter([]string{tgw.TgwId})
+			resultTgwRouteTable, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable)
+			if err != nil {
+				fmt.Println("Error getting the route tables for the TGW: ", tgw.TgwId)
+				fmt.Println("Error: ", err)
+				os.Exit(1)
+			}
+			for _, tgwRouteTable := range resultTgwRouteTable.TransitGatewayRouteTables {
+				newTgwRouteTable := awsrouter.TgwRouteTable{
+					TgwRouteTableId: *tgwRouteTable.TransitGatewayRouteTableId,
+					TwgRouteTable:   tgwRouteTable,
+				}
+				tgw.TgwRouteTables = append(tgw.TgwRouteTables, &newTgwRouteTable)
+			}
 		}
 
-		// Get all the routes
-
-
-
+		
+		for _, tgw := range tgws {
+			tgw.GetTgwRoutes(context.TODO(), client)
+		}
+		for _, tgw := range tgws {
+			fmt.Printf("The TGW id: %v has the routes\n", tgw.TgwId)
+			for _, tgwRouteTable := range tgw.TgwRouteTables {
+				fmt.Println("\tThe route table id:", tgwRouteTable.TgwRouteTableId)
+				for _, tgwRoute := range tgwRouteTable.TgwRoutes {
+					fmt.Println("\t\tThe route:", *tgwRoute.DestinationCidrBlock)
+				}
+			}
+		}
 
 	},
+
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
