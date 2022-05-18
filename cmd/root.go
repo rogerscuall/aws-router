@@ -49,14 +49,36 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
+		defer func() {
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+		}()
+
 		fmt.Println("Getting all routes from all route tables on all the TGWs in the region")
 		cfg, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
 		client := ec2.NewFromConfig(cfg)
-		awsrouter.GetAllRoutes(context.TODO(), client)
+		tgwInputFilter := awsrouter.TgwInputFilter([]string{})
+		resultTgw, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
+		tgws := resultTgw.TransitGateways
+		for _, tgw := range tgws {
+			fmt.Println("The TGW is: ", tgw.TransitGatewayId)
+		}
+
+		// Get all the route tables
+		inputTgwRouteTable := awsrouter.TgwRouteTableInputFilter([]string{})
+		resultTgwRouteTable, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable)
+		routeTables := resultTgwRouteTable.TransitGatewayRouteTables
+		for _, routeTable := range routeTables {
+			fmt.Println("The route table is: ", routeTable.TransitGatewayRouteTableId)
+		}
+
+		// Get all the routes
+
+
+
+
 	},
 }
 
