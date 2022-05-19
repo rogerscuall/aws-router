@@ -2,6 +2,7 @@ package awsrouter
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"sync"
 
@@ -73,8 +74,8 @@ func (t *Tgw) GetTgwRouteTables(ctx context.Context, api AwsRouter) error {
 			name = *tgwRouteTable.TransitGatewayRouteTableId
 		}
 		newTgwRouteTable := TgwRouteTable{
-			TgwRouteTableId: *tgwRouteTable.TransitGatewayRouteTableId,
-			TwgRouteTable:   tgwRouteTable,
+			TgwRouteTableId:   *tgwRouteTable.TransitGatewayRouteTableId,
+			TwgRouteTable:     tgwRouteTable,
 			TgwRouteTableName: name,
 		}
 		t.TgwRouteTables = append(t.TgwRouteTables, &newTgwRouteTable)
@@ -173,3 +174,18 @@ func GetTgwRoutes(ctx context.Context, api AwsRouter, input *ec2.SearchTransitGa
 // 	wg.Wait()
 // 	return tgwRoutes, nil
 // }
+
+// ExportRouteTableRoutesCsv creates a CSV with all the routes in one Tgw Route Table.
+func ExportRouteTableRoutesCsv(w *csv.Writer, tgwrt TgwRouteTable) error {
+	defer w.Flush()
+	w.Write([]string{"Destination CIDR Block", "State", "Type"})
+	for _, route := range tgwrt.TgwRoutes {
+		state := fmt.Sprint(route.State)
+		routeType := fmt.Sprint(route.Type)
+		err := w.Write([]string{*route.DestinationCidrBlock, state, routeType})
+		if err != nil {
+			return fmt.Errorf("error writing to csv: %w", err)
+		}
+	}
+	return nil
+}
