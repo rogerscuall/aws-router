@@ -63,9 +63,14 @@ to quickly create a Cobra application.`,
 		resultTgw, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
 		var tgws []*awsrouter.Tgw
 		for _, tgw := range resultTgw.TransitGateways {
+			name, err := awsrouter.GetNamesFromTags(tgw.Tags)
+			if err != nil {
+				name = *tgw.TransitGatewayId
+			}
 			newTgw := &awsrouter.Tgw{
 				TgwId:   *tgw.TransitGatewayId,
 				TgwData: tgw,
+				TgwName: name,
 			}
 			tgws = append(tgws, newTgw)
 		}
@@ -76,30 +81,18 @@ to quickly create a Cobra application.`,
 		// Get all the route tables
 
 		for _, tgw := range tgws {
-			inputTgwRouteTable := awsrouter.TgwRouteTableInputFilter([]string{tgw.TgwId})
-			resultTgwRouteTable, err := awsrouter.GetTgwRouteTables(context.TODO(), client, inputTgwRouteTable)
-			if err != nil {
-				fmt.Println("Error getting the route tables for the TGW: ", tgw.TgwId)
-				fmt.Println("Error: ", err)
-				os.Exit(1)
-			}
-			for _, tgwRouteTable := range resultTgwRouteTable.TransitGatewayRouteTables {
-				newTgwRouteTable := awsrouter.TgwRouteTable{
-					TgwRouteTableId: *tgwRouteTable.TransitGatewayRouteTableId,
-					TwgRouteTable:   tgwRouteTable,
-				}
-				tgw.TgwRouteTables = append(tgw.TgwRouteTables, &newTgwRouteTable)
+			if tgw.GetTgwRouteTables(context.TODO(), client); err != nil {
+				cobra.CheckErr(err)
 			}
 		}
 
-		
 		for _, tgw := range tgws {
 			tgw.GetTgwRoutes(context.TODO(), client)
 		}
 		for _, tgw := range tgws {
-			fmt.Printf("The TGW id: %v has the routes\n", tgw.TgwId)
+			fmt.Printf("The TGW id: %v has the routes\n", tgw.TgwName)
 			for _, tgwRouteTable := range tgw.TgwRouteTables {
-				fmt.Println("\tThe route table id:", tgwRouteTable.TgwRouteTableId)
+				fmt.Println("\tThe route table id:", tgwRouteTable.TgwRouteTableName)
 				for _, tgwRoute := range tgwRouteTable.TgwRoutes {
 					fmt.Println("\t\tThe route:", *tgwRoute.DestinationCidrBlock)
 				}
@@ -107,7 +100,6 @@ to quickly create a Cobra application.`,
 		}
 
 	},
-
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
