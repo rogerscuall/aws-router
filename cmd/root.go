@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"os"
 
@@ -99,6 +100,21 @@ to quickly create a Cobra application.`,
 			}
 		}
 
+		// Create a csv writer and export one route table
+		for _, tgw := range tgws {
+			for _, tgwRouteTable := range tgw.TgwRouteTables {
+				w, err := os.Create("csv/" + tgwRouteTable.TgwRouteTableName + ".csv")
+				if err != nil {
+					cobra.CheckErr(err)
+				}
+				defer w.Close()
+				writer := csv.NewWriter(w)
+				err = awsrouter.ExportRouteTableRoutesCsv(writer, *tgwRouteTable)
+				if err != nil {
+					cobra.CheckErr(err)
+				}
+			}
+		}
 	},
 }
 
