@@ -28,9 +28,10 @@ type Tgw struct {
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
 type TgwRouteTable struct {
-	TgwRouteTableId string
-	TwgRouteTable   types.TransitGatewayRouteTable
-	TgwRoutes       []types.TransitGatewayRoute
+	TgwRouteTableId   string
+	TgwRouteTableName string
+	TwgRouteTable     types.TransitGatewayRouteTable
+	TgwRoutes         []types.TransitGatewayRoute
 }
 
 // GetTgwRoutes it will populate the TgwRouteTable with the Routes.
@@ -48,7 +49,7 @@ func (t *Tgw) GetTgwRoutes(ctx context.Context, api AwsRouter) error {
 			inputTgwSearchRoutes := TgwSearchRoutesInputFilter(routeTable.TgwRouteTableId)
 			resultTgwSearchRoutes, err := GetTgwRoutes(context.TODO(), api, inputTgwSearchRoutes)
 			if err != nil {
-				err = fmt.Errorf("wrapping the original error => %w", err)
+				err = fmt.Errorf("error retrieve the table %s %w", routeTable.TgwRouteTableId, err)
 			}
 			routeTable.TgwRoutes = resultTgwSearchRoutes.Routes
 		}(tgwRouteTable)
@@ -57,8 +58,29 @@ func (t *Tgw) GetTgwRoutes(ctx context.Context, api AwsRouter) error {
 	return err
 }
 
-// GetTgwRouteTables
-// TODO: implement a GetTgwRouteTables similar to the previous one.
+// GetTgwRouteTables it will the Tgw with the Route Tables.
+// an error will stop the processing returning the error wrapped.
+
+func (t *Tgw) GetTgwRouteTables(ctx context.Context, api AwsRouter) error {
+	inputTgwRouteTable := TgwRouteTableInputFilter([]string{})
+	resultTgwRouteTable, err := GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
+	if err != nil {
+		return fmt.Errorf("error updating the route tables %w", err)
+	}
+	for _, tgwRouteTable := range resultTgwRouteTable.TransitGatewayRouteTables {
+		name, err := GetNamesFromTags(tgwRouteTable.Tags)
+		if err != nil {
+			name = *tgwRouteTable.TransitGatewayRouteTableId
+		}
+		newTgwRouteTable := TgwRouteTable{
+			TgwRouteTableId: *tgwRouteTable.TransitGatewayRouteTableId,
+			TwgRouteTable:   tgwRouteTable,
+			TgwRouteTableName: name,
+		}
+		t.TgwRouteTables = append(t.TgwRouteTables, &newTgwRouteTable)
+	}
+	return nil
+}
 
 // TgwInputFilter returns a filter for the DescribeTransitGatewaysInput.
 // tgwIDs is a list of Transit Gateway IDs.
