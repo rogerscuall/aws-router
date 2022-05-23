@@ -23,6 +23,11 @@ integrationtest:
     - aws-router excel
   tags:
     - aws
+  artifacts:
+    path: 
+      - csv
+      - excel
+    expire_in: 30 days
 
 build:
   stage: build
