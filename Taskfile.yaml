@@ -20,7 +20,7 @@ tasks:
     deps:
       - build
       - buildwindows
-  cleancsv:
+  cleanexports:
     cmds:
       - rm -f csv/*.csv
       - rm -f excel/*.xlsx
