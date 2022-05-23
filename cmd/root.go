@@ -56,49 +56,10 @@ to quickly create a Cobra application.`,
 				cobra.CheckErr(err)
 			}
 		}()
-
-		fmt.Println("Getting all routes from all route tables on all the TGWs in the region")
+		fmt.Println("Exporting AWS routing to CSV")
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
-		tgwInputFilter := awsrouter.TgwInputFilter([]string{})
-		resultTgw, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
-		var tgws []*awsrouter.Tgw
-		for _, tgw := range resultTgw.TransitGateways {
-			name, err := awsrouter.GetNamesFromTags(tgw.Tags)
-			if err != nil {
-				name = *tgw.TransitGatewayId
-			}
-			newTgw := &awsrouter.Tgw{
-				TgwId:   *tgw.TransitGatewayId,
-				TgwData: tgw,
-				TgwName: name,
-			}
-			tgws = append(tgws, newTgw)
-		}
-		// for _, tgw := range tgws {
-		// 	fmt.Println("The TGW is: ", tgw.TgwId)
-		// }
-
-		// Get all the route tables
-
-		for _, tgw := range tgws {
-			if tgw.GetTgwRouteTables(context.TODO(), client); err != nil {
-				cobra.CheckErr(err)
-			}
-		}
-
-		for _, tgw := range tgws {
-			tgw.GetTgwRoutes(context.TODO(), client)
-		}
-		for _, tgw := range tgws {
-			fmt.Printf("The TGW id: %v has the routes\n", tgw.TgwName)
-			for _, tgwRouteTable := range tgw.TgwRouteTables {
-				fmt.Println("\tThe route table id:", tgwRouteTable.TgwRouteTableName)
-				for _, tgwRoute := range tgwRouteTable.TgwRoutes {
-					fmt.Println("\t\tThe route:", *tgwRoute.DestinationCidrBlock)
-				}
-			}
-		}
+		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
 
 		// Create a csv writer and export one route table
 		for _, tgw := range tgws {
