@@ -4,22 +4,28 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"io/fs"
 	"sync"
 
+
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
 )
 
+// AwsRouter is an interface with the methods needed for routing.
 type AwsRouter interface {
 	DescribeTransitGateways(ctx context.Context, params *ec2.DescribeTransitGatewaysInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewaysOutput, error)
 	DescribeTransitGatewayRouteTables(ctx context.Context, params *ec2.DescribeTransitGatewayRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayRouteTablesOutput, error)
 	SearchTransitGatewayRoutes(ctx context.Context, params *ec2.SearchTransitGatewayRoutesInput, optFns ...func(*ec2.Options)) (*ec2.SearchTransitGatewayRoutesOutput, error)
 }
 
-//Tgw is the main datastructure, holds ID, Name, a list of TgwRouteTable and other TGW info.
+//Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.
+// represents a Transit Gateway in AWS.
 // TODO: Implement a constructor that adds Name.
-// Remove the Tgw from the fields.
+//
+// TODO: Remove the Tgw from the fields.
 type Tgw struct {
 	TgwId          string
 	TgwName        string
@@ -28,6 +34,7 @@ type Tgw struct {
 }
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
+// represents a Route Table of a Transit Gateway in AWS.
 type TgwRouteTable struct {
 	TgwRouteTableId   string
 	TgwRouteTableName string
@@ -35,33 +42,8 @@ type TgwRouteTable struct {
 	TgwRoutes         []types.TransitGatewayRoute
 }
 
-// GetTgwRoutes it will populate the TgwRouteTable with the Routes.
-// TODO: Add some sentinel error message to notify if a the calls to GetTgwRoutes fail.
-// The call use concurrency, because on each Tgw there are multiple Route Tables.
-// TODO: add testing and include race condition detection.
-// Each Tgw has a list of RouteTables, each RouteTable gets is own goroutine.
-func (t *Tgw) GetTgwRoutes(ctx context.Context, api AwsRouter) error {
-	var wg sync.WaitGroup
-	var err error
-	for _, tgwRouteTable := range t.TgwRouteTables {
-		wg.Add(1)
-		go func(routeTable *TgwRouteTable) {
-			defer wg.Done()
-			inputTgwSearchRoutes := TgwSearchRoutesInputFilter(routeTable.TgwRouteTableId)
-			resultTgwSearchRoutes, err := GetTgwRoutes(context.TODO(), api, inputTgwSearchRoutes)
-			if err != nil {
-				err = fmt.Errorf("error retrieve the table %s %w", routeTable.TgwRouteTableId, err)
-			}
-			routeTable.TgwRoutes = resultTgwSearchRoutes.Routes
-		}(tgwRouteTable)
-	}
-	wg.Wait()
-	return err
-}
-
-// GetTgwRouteTables it will the Tgw with the Route Tables.
+// GetTgwRouteTables populates the field TgwRouteTables on a Tgw.
 // an error will stop the processing returning the error wrapped.
-
 func (t *Tgw) GetTgwRouteTables(ctx context.Context, api AwsRouter) error {
 	inputTgwRouteTable := TgwRouteTableInputFilter([]string{})
 	resultTgwRouteTable, err := GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
@@ -81,6 +63,34 @@ func (t *Tgw) GetTgwRouteTables(ctx context.Context, api AwsRouter) error {
 		t.TgwRouteTables = append(t.TgwRouteTables, &newTgwRouteTable)
 	}
 	return nil
+}
+
+// GetTgwRoutes populates the routes of a route table.
+//
+// TODO: Add some sentinel error message to notify if a the calls to GetTgwRoutes fail.
+//
+// The call use concurrency, because on each Tgw there are multiple Route Tables.
+//
+// TODO: add testing and include race condition detection.
+//
+// Each Tgw has a list of TgwRouteTables, each RouteTable gets is own goroutine.
+func (t *Tgw) GetTgwRoutes(ctx context.Context, api AwsRouter) error {
+	var wg sync.WaitGroup
+	var err error
+	for _, tgwRouteTable := range t.TgwRouteTables {
+		wg.Add(1)
+		go func(routeTable *TgwRouteTable) {
+			defer wg.Done()
+			inputTgwSearchRoutes := TgwSearchRoutesInputFilter(routeTable.TgwRouteTableId)
+			resultTgwSearchRoutes, err := GetTgwRoutes(context.TODO(), api, inputTgwSearchRoutes)
+			if err != nil {
+				err = fmt.Errorf("error retrieve the table %s %w", routeTable.TgwRouteTableId, err)
+			}
+			routeTable.TgwRoutes = resultTgwSearchRoutes.Routes
+		}(tgwRouteTable)
+	}
+	wg.Wait()
+	return err
 }
 
 // TgwInputFilter returns a filter for the DescribeTransitGatewaysInput.
@@ -155,26 +165,6 @@ func GetTgwRoutes(ctx context.Context, api AwsRouter, input *ec2.SearchTransitGa
 	return api.SearchTransitGatewayRoutes(ctx, input)
 }
 
-// GetTgwRoutesConcurrently returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
-// func GetTgwRoutesConcurrently(ctx context.Context, client *ec2.Client, tgws []*) ( error) {
-// 	var wg sync.WaitGroup
-// 	var tgwRoutes []types.TransitGatewayRoute
-// 	for _, routeTable := range routeTables {
-// 		wg.Add(1)
-// 		go func(routeTable types.TransitGatewayRouteTable) {
-// 			defer wg.Done()
-// 			inputTgwSearchRoutes := TgwSearchRoutesInputFilter(*routeTable.TransitGatewayRouteTableId)
-// 			resultTgwSearchRoutes, err := GetTgwRoutes(ctx, client, inputTgwSearchRoutes)
-// 			if err != nil {
-// 				fmt.Printf("Error retrieving the routes in the route table %s %v\n", *routeTable.TransitGatewayRouteTableId, err)
-// 			}
-// 			tgwRoutes = append(tgwRoutes, resultTgwSearchRoutes.Routes...)
-// 		}(routeTable)
-// 	}
-// 	wg.Wait()
-// 	return tgwRoutes, nil
-// }
-
 // ExportRouteTableRoutesCsv creates a CSV with all the routes in one Tgw Route Table.
 func ExportRouteTableRoutesCsv(w *csv.Writer, tgwrt TgwRouteTable) error {
 	defer w.Flush()
@@ -188,4 +178,84 @@ func ExportRouteTableRoutesCsv(w *csv.Writer, tgwrt TgwRouteTable) error {
 		}
 	}
 	return nil
+}
+
+// ExportTgwRoutesExcel creates a Excel with all the routes in all Tgw Route Tables.
+// Each sheet on the Excel is a Tgw Route Table, each route is a route.
+func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
+	if !folder.IsDir() {
+		return fmt.Errorf("folder %s is not a directory", folder.Name())
+	}
+	folderName := folder.Name()
+	for _, tgw := range tgws {
+		f := excelize.NewFile()
+		for _, tgwRouteTable := range tgw.TgwRouteTables {
+			sheet := f.NewSheet(tgwRouteTable.TgwRouteTableName)
+			for i, route := range tgwRouteTable.TgwRoutes {
+				// Only for the header
+				if i == 0 {
+					// TODO: create an optional function to create a header and row
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "A1", "Destination")
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "B1", "State")
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "C1", "RouteType")
+				}
+				state := fmt.Sprint(route.State)
+				routeType := fmt.Sprint(route.Type)
+				row := []string{
+					*route.DestinationCidrBlock,
+					state,
+					routeType,
+				}
+				f.SetSheetRow(tgwRouteTable.TgwRouteTableName, "A"+fmt.Sprint(i+2), &row)
+			}
+			f.SetActiveSheet(sheet)
+		}
+		fileName := fmt.Sprintf("%s/%s.xlsx", folderName, tgw.TgwName)
+		if err := f.SaveAs(fileName); err != nil {
+			return fmt.Errorf("error saving excel: %w", err)
+		}
+	}
+	return nil
+}
+
+// GetAllTgws returns a list of all the Transit Gateways in the account for specific region
+func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
+	input := &ec2.DescribeTransitGatewaysInput{}
+	result, err := GetTgw(ctx, api, input)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
+	}
+	var tgws []*Tgw
+	for _, tgw := range result.TransitGateways {
+		name, err := GetNamesFromTags(tgw.Tags)
+		if err != nil {
+			name = *tgw.TransitGatewayId
+		}
+		newTgw := &Tgw{
+			TgwId:   *tgw.TransitGatewayId,
+			TgwData: tgw,
+			TgwName: name,
+		}
+		tgws = append(tgws, newTgw)
+	}
+	return tgws, nil
+}
+
+// UpdateRouting this functions is a helper that will update all routing information from AWS, returning a list of Tgw.
+func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
+	tgws, err := GetAllTgws(ctx, api)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
+	}
+	for _, tgw := range tgws {
+		if tgw.GetTgwRouteTables(context.TODO(), api); err != nil {
+			return nil, fmt.Errorf("error retrieving Transit Gateway Route Tables: %w", err)
+		}
+	}
+	// Get all routes from all route tables
+	for _, tgw := range tgws {
+		tgw.GetTgwRoutes(context.TODO(), api)
+	}
+
+	return tgws, nil
 }
