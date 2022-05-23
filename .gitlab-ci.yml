@@ -17,7 +17,9 @@ integrationtest:
   stage: tests
   script:
     - go install gitlab.presidio.com/rgomez/aws-router
+    - mkdir csv
     - aws-router
+    - mkdir excel
     - aws-router excel
   tags:
     - aws
