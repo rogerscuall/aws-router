@@ -13,6 +13,15 @@ unittest:
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task test
 
+integrationtest:
+  stage: tests
+  script:
+    - go install gitlab.presidio.com/rgomez/aws-router
+    - aws-router
+    - aws-router excel
+  tags:
+    - aws
+
 build:
   stage: build
   script:
