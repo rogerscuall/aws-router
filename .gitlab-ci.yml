@@ -24,10 +24,9 @@ integrationtest:
   tags:
     - aws
   artifacts:
-    path: 
+    paths: 
       - csv
       - excel
-    expire_in: 30 days
 
 build:
   stage: build
