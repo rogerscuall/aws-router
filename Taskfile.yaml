@@ -20,6 +20,11 @@ tasks:
     deps:
       - build
       - buildwindows
+  docs:
+    cmds:
+      - echo "Open the browser and navigate to http://localhost:6060/docs"
+      - echo "To get all methods, fields and types regardeless if they are exported or not, use '?m=all' at the end of the URL"
+      - godoc -http=:6060
   cleanexports:
     cmds:
       - rm -f csv/*.csv
