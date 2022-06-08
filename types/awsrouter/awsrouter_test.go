@@ -2,6 +2,7 @@ package awsrouter
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -56,7 +57,7 @@ var listDescribeTransitGatewayRouteTablesOutput *ec2.DescribeTransitGatewayRoute
 				{Key: aws.String("Name"),
 					Value: aws.String("testA")},
 			},
-			State: "available",
+			State:            "available",
 			TransitGatewayId: aws.String("tgw-0d7f9b0a"),
 		},
 		{
@@ -65,7 +66,7 @@ var listDescribeTransitGatewayRouteTablesOutput *ec2.DescribeTransitGatewayRoute
 				{Key: aws.String("Name"),
 					Value: aws.String("testB")},
 			},
-			State: "available",
+			State:            "available",
 			TransitGatewayId: aws.String("tgw-0d7f9b0a"),
 		},
 		{
@@ -74,8 +75,31 @@ var listDescribeTransitGatewayRouteTablesOutput *ec2.DescribeTransitGatewayRoute
 				{Key: aws.String("Name"),
 					Value: aws.String("testC")},
 			},
-			State: "available",
+			State:            "available",
 			TransitGatewayId: aws.String("tgw-0d7f9b0b"),
+		},
+	},
+}
+
+var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput = &ec2.SearchTransitGatewayRoutesOutput{
+	Routes: []types.TransitGatewayRoute{
+		{
+			DestinationCidrBlock:      aws.String("10.0.0.0/24"),
+			State:                     "active",
+			Type:                      "static",
+			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
+		},
+		{
+			DestinationCidrBlock:      aws.String("10.0.1.0/24"),
+			State:                     "blackhole",
+			Type:                      "static",
+			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
+		},
+		{
+			DestinationCidrBlock:      aws.String("10.0.2.0/24"),
+			State:                     "active",
+			Type:                      "static",
+			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
 		},
 	},
 }
@@ -127,19 +151,26 @@ func (t TgwDescriberImpl) DescribeTransitGatewayRouteTables(ctx context.Context,
 }
 
 func (t TgwDescriberImpl) SearchTransitGatewayRoutes(ctx context.Context, params *ec2.SearchTransitGatewayRoutesInput, optFns ...func(*ec2.Options)) (*ec2.SearchTransitGatewayRoutesOutput, error) {
+	// if the filter is empty, return all TransitGatewayRoutes
+	filters := params.Filters
+	if len(filters) == 0 {
+		return listSearchTransitGatewayRoutesOutput, nil
+	}
+	// if the filter is not empty, return only the TransitGatewayRoutes that are in the filter
+	var tgwrts []types.TransitGatewayRoute
+	for _, tgwrt := range listSearchTransitGatewayRoutesOutput.Routes {
+		for _, f := range filters {
+			if *f.Name == "state" {
+				for _, state := range f.Values {
+					if fmt.Sprint(tgwrt.State) == state {
+						tgwrts = append(tgwrts, tgwrt)
+					}
+				}
+			}
+		}
+	}
 	return &ec2.SearchTransitGatewayRoutesOutput{
-		Routes: []types.TransitGatewayRoute{
-			{
-				DestinationCidrBlock: aws.String("10.0.1.0/24"),
-				State:                "active",
-				Type:                 "static",
-			},
-			{
-				DestinationCidrBlock: aws.String("10.0.2.0/24"),
-				State:                "active",
-				Type:                 "static",
-			},
-		},
+		Routes: tgwrts,
 	}, nil
 
 }
@@ -288,25 +319,30 @@ func TestGetTgwRoutes(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"test1",
-			args{
-				context.TODO(),
+			"TestGetTgwRoutesEmptyFilter",
+			args{context.TODO(),
 				TgwDescriberImpl{},
 				&ec2.SearchTransitGatewayRoutesInput{},
 			},
-			&ec2.SearchTransitGatewayRoutesOutput{
-				Routes: []types.TransitGatewayRoute{
-					{
-						DestinationCidrBlock: aws.String("10.0.1.0/24"),
-						State:                "active",
-						Type:                 "static",
-					},
-					{
-						DestinationCidrBlock: aws.String("10.0.2.0/24"),
-						State:                "active",
-						Type:                 "static",
+			listSearchTransitGatewayRoutesOutput,
+			false,
+		},
+		{
+			"TestGetTgwRoutesFilter",
+			args{context.TODO(),
+				TgwDescriberImpl{},
+				&ec2.SearchTransitGatewayRoutesInput{
+					Filters: []types.Filter{
+						{
+							Name:   aws.String("state"),
+							Values: []string{"active"},
+						},
 					},
 				},
+			},
+			&ec2.SearchTransitGatewayRoutesOutput{
+				Routes: []types.TransitGatewayRoute{listSearchTransitGatewayRoutesOutput.Routes[0],
+					listSearchTransitGatewayRoutesOutput.Routes[2]},
 			},
 			false,
 		},
