@@ -21,6 +21,8 @@ integrationtest:
     - aws-router
     - mkdir excel
     - aws-router excel
+    - touch .go-aws-routing.yaml
+    - echo "db_Name: testing-db123" > .go-aws-routing.yaml
     - aws-router sync
   tags:
     - aws

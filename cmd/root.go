@@ -109,6 +109,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".go-aws-routing" (without extension).
 		viper.AddConfigPath(home)
+		viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".go-aws-routing")
 	}
