@@ -19,7 +19,7 @@ type AwsRouter interface {
 }
 
 //Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.
-// represents a Transit Gateway in AWS.
+// Represents a Transit Gateway in AWS.
 type Tgw struct {
 	ID          string
 	Name        string
@@ -48,12 +48,35 @@ func newTgw(tgw types.TransitGateway) *Tgw {
 }
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
-// represents a Route Table of a Transit Gateway in AWS.
+// Represents a Route Table of a Transit Gateway in AWS.
 type TgwRouteTable struct {
 	ID     string
 	Name   string
 	Data   types.TransitGatewayRouteTable
 	Routes []types.TransitGatewayRoute
+}
+
+// newTgwRouteTable creates a TgwRouteTable from an AWS TGW Route Table.
+func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
+	// rt is the TgwRouteTable
+	rt := &TgwRouteTable{}
+
+	// if tgwRouteTable has no id return the empty TgwRouteTable struct.
+	if t.TransitGatewayRouteTableId == nil {
+		return rt
+	}
+
+	name, err := GetNamesFromTags(t.Tags)
+		if err != nil {
+			name = *t.TransitGatewayRouteTableId
+		}
+
+	rt.ID = *t.TransitGatewayRouteTableId
+	rt.Data = t
+	rt.Name = name
+
+	return rt
+
 }
 
 // UpdateRouteTables updates the field TgwRouteTables on a Tgw.
@@ -65,16 +88,7 @@ func (t *Tgw) UpdateRouteTables(ctx context.Context, api AwsRouter) error {
 		return fmt.Errorf("error updating the route tables %w", err)
 	}
 	for _, tgwRouteTable := range resultTgwRouteTable.TransitGatewayRouteTables {
-		name, err := GetNamesFromTags(tgwRouteTable.Tags)
-		if err != nil {
-			name = *tgwRouteTable.TransitGatewayRouteTableId
-		}
-		newTgwRouteTable := TgwRouteTable{
-			ID:   *tgwRouteTable.TransitGatewayRouteTableId,
-			Data: tgwRouteTable,
-			Name: name,
-		}
-		t.RouteTables = append(t.RouteTables, &newTgwRouteTable)
+		t.RouteTables = append(t.RouteTables, newTgwRouteTable(tgwRouteTable))
 	}
 	return nil
 }
@@ -123,8 +137,8 @@ func GetTgw(ctx context.Context, api AwsRouter, input *ec2.DescribeTransitGatewa
 }
 
 // TgwRouteTableInputFilter returns a filter for the DescribeTransitGatewayRouteTables.
-// tgwIDs is a list of Transit Gateway IDs.
-// and empty tgwIDs creates a filter that returns all Transit Gateway Route Tables in the account.
+// The tgwIDs is a list of Transit Gateway IDs.
+// An empty tgwIDs creates a filter that returns all Transit Gateway Route Tables in the account.
 func TgwRouteTableInputFilter(tgwIDs []string) *ec2.DescribeTransitGatewayRouteTablesInput {
 	if len(tgwIDs) == 0 {
 		return &ec2.DescribeTransitGatewayRouteTablesInput{}
@@ -202,9 +216,8 @@ func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
 	}
 	var tgws []*Tgw
-	for _, tgw := range result.TransitGateways {
-		newTgw := newTgw(tgw)
-		tgws = append(tgws, newTgw)
+	for _, tgw := range result.TransitGateways {		
+		tgws = append(tgws, newTgw(tgw))
 	}
 	return tgws, nil
 }
