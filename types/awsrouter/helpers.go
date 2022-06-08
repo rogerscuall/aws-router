@@ -78,23 +78,23 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 	folderName := folder.Name()
 	for _, tgw := range tgws {
 		f := excelize.NewFile()
-		for _, tgwRouteTable := range tgw.TgwRouteTables {
-			sheet := f.NewSheet(tgwRouteTable.TgwRouteTableName)
-			for i, route := range tgwRouteTable.TgwRoutes {
+		for _, tgwRouteTable := range tgw.RouteTables {
+			sheet := f.NewSheet(tgwRouteTable.Name)
+			for i, route := range tgwRouteTable.Routes {
 				// Only for the header
 				if i == 0 {
 					// TODO: create an optional function to create a header and row
-					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "A1", "Destination")
-					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "B1", "State")
-					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "C1", "RouteType")
-					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "D1", "PrefixList")
+					f.SetCellValue(tgwRouteTable.Name, "A1", "Destination")
+					f.SetCellValue(tgwRouteTable.Name, "B1", "State")
+					f.SetCellValue(tgwRouteTable.Name, "C1", "RouteType")
+					f.SetCellValue(tgwRouteTable.Name, "D1", "PrefixList")
 				}
 				state := fmt.Sprint(route.State)
 				routeType := fmt.Sprint(route.Type)
 				var prefixListId string
 				if route.PrefixListId == nil {
 					prefixListId = "-"
-				}else {
+				} else {
 					prefixListId = *route.PrefixListId
 				}
 				row := []string{
@@ -103,11 +103,11 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 					routeType,
 					prefixListId,
 				}
-				f.SetSheetRow(tgwRouteTable.TgwRouteTableName, "A"+fmt.Sprint(i+2), &row)
+				f.SetSheetRow(tgwRouteTable.Name, "A"+fmt.Sprint(i+2), &row)
 			}
 			f.SetActiveSheet(sheet)
 		}
-		fileName := fmt.Sprintf("%s/%s.xlsx", folderName, tgw.TgwName)
+		fileName := fmt.Sprintf("%s/%s.xlsx", folderName, tgw.Name)
 		if err := f.SaveAs(fileName); err != nil {
 			return fmt.Errorf("error saving excel: %w", err)
 		}
