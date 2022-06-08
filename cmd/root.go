@@ -63,8 +63,8 @@ to quickly create a Cobra application.`,
 
 		// Create a csv writer and export one route table
 		for _, tgw := range tgws {
-			for _, tgwRouteTable := range tgw.TgwRouteTables {
-				w, err := os.Create("csv/" + tgwRouteTable.TgwRouteTableName + ".csv")
+			for _, tgwRouteTable := range tgw.RouteTables {
+				w, err := os.Create("csv/" + tgwRouteTable.Name + ".csv")
 				if err != nil {
 					cobra.CheckErr(err)
 				}
