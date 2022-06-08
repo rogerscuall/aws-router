@@ -35,13 +35,8 @@ import (
 // excelCmd represents the excel command
 var excelCmd = &cobra.Command{
 	Use:   "excel",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "export all route tables to excel",
+	Long: `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		defer func() {
