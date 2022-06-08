@@ -45,7 +45,7 @@ type TgwRouteTable struct {
 // GetTgwRouteTables populates the field TgwRouteTables on a Tgw.
 // an error will stop the processing returning the error wrapped.
 func (t *Tgw) GetTgwRouteTables(ctx context.Context, api AwsRouter) error {
-	inputTgwRouteTable := TgwRouteTableInputFilter([]string{})
+	inputTgwRouteTable := TgwRouteTableInputFilter([]string{t.TgwId})
 	resultTgwRouteTable, err := GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
 	if err != nil {
 		return fmt.Errorf("error updating the route tables %w", err)
