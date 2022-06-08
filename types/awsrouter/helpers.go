@@ -3,9 +3,11 @@ package awsrouter
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"strings"
 	"sync"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
@@ -65,4 +67,50 @@ func GetNamesFromTags(tags []types.Tag) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("no name tag found")
+}
+
+// ExportTgwRoutesExcel creates a Excel with all the routes in all Tgw Route Tables.
+// Each sheet on the Excel is a Tgw Route Table, each route is a route.
+func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
+	if !folder.IsDir() {
+		return fmt.Errorf("folder %s is not a directory", folder.Name())
+	}
+	folderName := folder.Name()
+	for _, tgw := range tgws {
+		f := excelize.NewFile()
+		for _, tgwRouteTable := range tgw.TgwRouteTables {
+			sheet := f.NewSheet(tgwRouteTable.TgwRouteTableName)
+			for i, route := range tgwRouteTable.TgwRoutes {
+				// Only for the header
+				if i == 0 {
+					// TODO: create an optional function to create a header and row
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "A1", "Destination")
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "B1", "State")
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "C1", "RouteType")
+					f.SetCellValue(tgwRouteTable.TgwRouteTableName, "D1", "PrefixList")
+				}
+				state := fmt.Sprint(route.State)
+				routeType := fmt.Sprint(route.Type)
+				var prefixListId string
+				if route.PrefixListId == nil {
+					prefixListId = "-"
+				}else {
+					prefixListId = *route.PrefixListId
+				}
+				row := []string{
+					*route.DestinationCidrBlock,
+					state,
+					routeType,
+					prefixListId,
+				}
+				f.SetSheetRow(tgwRouteTable.TgwRouteTableName, "A"+fmt.Sprint(i+2), &row)
+			}
+			f.SetActiveSheet(sheet)
+		}
+		fileName := fmt.Sprintf("%s/%s.xlsx", folderName, tgw.TgwName)
+		if err := f.SaveAs(fileName); err != nil {
+			return fmt.Errorf("error saving excel: %w", err)
+		}
+	}
+	return nil
 }
