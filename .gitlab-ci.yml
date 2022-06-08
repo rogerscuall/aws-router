@@ -21,6 +21,7 @@ integrationtest:
     - aws-router
     - mkdir excel
     - aws-router excel
+    - aws-router sync
   tags:
     - aws
   artifacts:
