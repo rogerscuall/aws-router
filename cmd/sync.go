@@ -22,55 +22,60 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"strings"
+	"context"
+	"fmt"
 
-	"github.com/rs/xid"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.presidio.com/rgomez/aws-router/adapters/db"
 	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"gitlab.presidio.com/rgomez/aws-router/types/awsrouter"
 )
 
 var dbName string
 
-// processCmd represents the process command
-var processCmd = &cobra.Command{
-	Use:   "process",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// syncCmd represents the sync command
+var syncCmd = &cobra.Command{
+	Use:   "sync",
+	Short: "Extracts all routing information from AWS and save it to a DB for later use",
+	Long:  `Once the DB is populated, we can find information about routing`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
+		defer func() {
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+		}()
 		dbName = viper.GetString("db_name")
 		var dbAdapter ports.DbPort
-		var err error
 		dbAdapter, err = db.NewAdapter(dbName)
 		defer dbAdapter.CloseDbConnection()
-
-		id := xid.New().String()[13:]
-		taskName := strings.Join(args, " ")
-		task := tasks.New(id, taskName)
-		bTask := tasks.ToBytes(task)
-		err = dbAdapter.SetVal(id, bTask)
-		if err != nil {
-			panic(err)
+		fmt.Println("Downloading routing information from AWS")
+		cfg, err := config.LoadDefaultConfig(context.TODO())
+		client := ec2.NewFromConfig(cfg)
+		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
+		fmt.Println("Saving routing information to DB")
+		for _, tgw := range tgws {
+			err = dbAdapter.SetVal(tgw.ID, tgw.Bytes())
+			if err != nil {
+				panic(err)
+			}
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(processCmd)
+	rootCmd.AddCommand(syncCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// processCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// syncCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// processCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// syncCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
