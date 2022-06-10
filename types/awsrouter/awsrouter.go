@@ -1,8 +1,12 @@
+/*
+This library is a collection of calls to work with routing information on AWS.
+*/
 package awsrouter
 
 import (
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -47,6 +51,12 @@ func newTgw(tgw types.TransitGateway) *Tgw {
 	return t
 }
 
+// Bytes returns the JSON representation of the Tgw as a slice of bytes.
+func (t *Tgw) Bytes() []byte {
+	b, _ := json.Marshal(t)
+	return b
+}
+
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
 // Represents a Route Table of a Transit Gateway in AWS.
 type TgwRouteTable struct {
@@ -54,6 +64,12 @@ type TgwRouteTable struct {
 	Name   string
 	Data   types.TransitGatewayRouteTable
 	Routes []types.TransitGatewayRoute
+}
+
+// Bytes returns the JSON representation of the TgwRouteTable as a slice of bytes.
+func (t *TgwRouteTable) Bytes() []byte {
+	b, _ := json.Marshal(t)
+	return b
 }
 
 // newTgwRouteTable creates a TgwRouteTable from an AWS TGW Route Table.
@@ -67,9 +83,9 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 	}
 
 	name, err := GetNamesFromTags(t.Tags)
-		if err != nil {
-			name = *t.TransitGatewayRouteTableId
-		}
+	if err != nil {
+		name = *t.TransitGatewayRouteTableId
+	}
 
 	rt.ID = *t.TransitGatewayRouteTableId
 	rt.Data = t
@@ -216,13 +232,16 @@ func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
 	}
 	var tgws []*Tgw
-	for _, tgw := range result.TransitGateways {		
+	for _, tgw := range result.TransitGateways {
 		tgws = append(tgws, newTgw(tgw))
 	}
 	return tgws, nil
 }
 
 // UpdateRouting this functions is a helper that will update all routing information from AWS, returning a list of Tgw.
+// The function will try to gather all the Route Tables and all the routes in the Route Tables.
+// The function will return an error if it fails to gather a Transit Gateway or a Route Table, but it will continue
+// if it fails to gather a route.
 func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	tgws, err := GetAllTgws(ctx, api)
 	if err != nil {
