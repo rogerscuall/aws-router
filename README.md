@@ -24,10 +24,9 @@ Credentials need to have permissions for:
 
 For all objects.
 
-This tool is used from the CLI so test you have access before trying this tool:
-
-* `aws ec2 describe-transit-gateways`
+This tool is used from the CLI so test you have access before trying this tool for example with `aws ec2 describe-transit-gateways`.
 
 AWS Router should be able to identify the credentials and try to use them.
+If you download the binary use it with `./awsrouters` or whatever it is the name used for the file.
 
 [![asciicast](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq.svg)](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq)
