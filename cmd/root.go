@@ -39,7 +39,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "go-aws-routing",
+	Use:   "awsrouters",
 	Short: "Extracts all routing information from AWS and save it to a CSV file",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
