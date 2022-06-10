@@ -1,3 +1,6 @@
+/*
+This library is a collection of calls to work with routing information on AWS.
+*/
 package awsrouter
 
 import (
@@ -61,6 +64,12 @@ type TgwRouteTable struct {
 	Name   string
 	Data   types.TransitGatewayRouteTable
 	Routes []types.TransitGatewayRoute
+}
+
+// Bytes returns the JSON representation of the TgwRouteTable as a slice of bytes.
+func (t *TgwRouteTable) Bytes() []byte {
+	b, _ := json.Marshal(t)
+	return b
 }
 
 // newTgwRouteTable creates a TgwRouteTable from an AWS TGW Route Table.
@@ -230,6 +239,9 @@ func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 }
 
 // UpdateRouting this functions is a helper that will update all routing information from AWS, returning a list of Tgw.
+// The function will try to gather all the Route Tables and all the routes in the Route Tables.
+// The function will return an error if it fails to gather a Transit Gateway or a Route Table, but it will continue
+// if it fails to gather a route.
 func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	tgws, err := GetAllTgws(ctx, api)
 	if err != nil {

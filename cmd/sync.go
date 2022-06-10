@@ -22,19 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gitlab.presidio.com/rgomez/aws-router/adapters/db"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
-	"gitlab.presidio.com/rgomez/aws-router/types/awsrouter"
 )
 
-var dbName string
 
 // syncCmd represents the sync command
 var syncCmd = &cobra.Command{
@@ -42,27 +32,7 @@ var syncCmd = &cobra.Command{
 	Short: "Extracts all routing information from AWS and save it to a DB for later use",
 	Long:  `Once the DB is populated, we can find information about routing`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		defer func() {
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-		}()
-		dbName = viper.GetString("db_name")
-		var dbAdapter ports.DbPort
-		dbAdapter, err = db.NewAdapter(dbName)
-		defer dbAdapter.CloseDbConnection()
-		fmt.Println("Downloading routing information from AWS")
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		client := ec2.NewFromConfig(cfg)
-		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
-		fmt.Println("Saving routing information to DB")
-		for _, tgw := range tgws {
-			err = dbAdapter.SetVal(tgw.ID, tgw.Bytes())
-			if err != nil {
-				panic(err)
-			}
-		}
+		syncDb()
 	},
 }
 
