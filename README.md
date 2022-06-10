@@ -32,3 +32,5 @@ AWS Router should be able to identify the credentials and try to use them.
 
 [![asciicast](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq.svg)](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq)
 [![asciicast](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq.svg)](https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq)
+
+<script id="asciicast-bw7mIVO1sbJwQoelxK2UVm4jq" src="https://asciinema.org/a/bw7mIVO1sbJwQoelxK2UVm4jq.js" async></script>
