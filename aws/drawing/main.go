@@ -45,6 +45,30 @@ func main() {
 				ID:   "rt-12345678",
 				Name: "rt-12345678",
 			},
+			{
+				ID:   "rt-123456789",
+				Name: "rt-123456789",
+			},
+			{
+				ID:   "rt-1234567890",
+				Name: "rt-1234567890",
+			},
+			{
+				ID:   "rt-12345678901",
+				Name: "rt-12345678901",
+			},
+			{
+				ID:   "rt-123456789012",
+				Name: "rt-123456789012",
+			},
+			{
+				ID:   "rt-1234567890123",
+				Name: "rt-1234567890123",
+			},
+			{
+				ID:   "rt-12345678901234",
+				Name: "rt-12345678901234",
+			},
 		},
 	}
 	//fmt.Println(tgw)
@@ -76,7 +100,7 @@ func main() {
 		Size: 40,
 	})
 	dc.SetFontFace(face)
-	
+
 	// Draw a TGW
 	// color for the rectangle
 	dc.DrawRectangle(100, 100, float64(tgwWidth), float64(tgwHeight))
@@ -91,7 +115,7 @@ func main() {
 	// find height for each route table
 	// height of each route table
 
-	rtHeight := (tgwHeight - 2*routeMargin) / numRt
+	rtHeight := (tgwHeight - 2*routeMargin) // numRt
 	for i, rt := range tgw.RouteTables {
 		dc.Push()
 		x := 100 + routeMargin + i*(rtWidth+routeMargin)
