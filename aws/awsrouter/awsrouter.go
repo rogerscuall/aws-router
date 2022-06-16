@@ -92,7 +92,6 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 	rt.Name = name
 
 	return rt
-
 }
 
 // UpdateRouteTables updates the field TgwRouteTables on a Tgw.
@@ -258,4 +257,20 @@ func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	}
 
 	return tgws, nil
+}
+
+// TgwAttachments holds the data of a Transit Gateway Attachment.
+type TgwAttachments struct {
+	ID         string
+	ResourceID string
+	Type       string
+}
+
+func newTgwAttach(att types.TransitGatewayRouteAttachment) *TgwAttachments {
+	attType := fmt.Sprint(att.ResourceType)
+	return &TgwAttachments{
+		ID:         *att.TransitGatewayAttachmentId,
+		ResourceID: *att.ResourceId,
+		Type:       attType,
+	}
 }
