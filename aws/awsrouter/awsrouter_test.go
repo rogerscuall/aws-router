@@ -52,19 +52,19 @@ var listDescribeTransitGatewaysOutput *ec2.DescribeTransitGatewaysOutput = &ec2.
 
 var listTgw []*Tgw = []*Tgw{
 	{
-		ID:    "tgw-0d7f9b0a",
-		Name:  "testA",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[0],
+		ID:   "tgw-0d7f9b0a",
+		Name: "testA",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[0],
 	},
 	{
-		ID:    "tgw-0d7f9b0b",
-		Name:  "testB",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[1],
+		ID:   "tgw-0d7f9b0b",
+		Name: "testB",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[1],
 	},
 	{
-		ID: "tgw-0d7f9b0c",
-		Name:  "testC",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[2],
+		ID:   "tgw-0d7f9b0c",
+		Name: "testC",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[2],
 	},
 }
 
@@ -120,6 +120,29 @@ var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput =
 			Type:                      "static",
 			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
 		},
+	},
+}
+
+var listTgwAttachments []types.TransitGatewayRouteAttachment = []types.TransitGatewayRouteAttachment{
+	{
+		ResourceId:                 aws.String("vpc-0af25be733475a425"),
+		ResourceType:               "vpc",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+		ResourceType:               "peering",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+		ResourceType:               "connect",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-attach-0a0f3014bd52ec98f"),
+		ResourceType:               "direct-connect-gateway",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
 	},
 }
 
@@ -599,6 +622,58 @@ func TestGetAllTgws(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetAllTgws() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_newTgwAttachments(t *testing.T) {
+	type args struct {
+		att types.TransitGatewayRouteAttachment
+	}
+	tests := []struct {
+		name string
+		args args
+		want *TgwAttachment
+	}{
+		{
+			"vpc",
+			args{
+				listTgwAttachments[0],
+			},
+			&TgwAttachment{
+				ID:         "tgw-attach-080f3014bd52ec95f",
+				ResourceID: "vpc-0af25be733475a425",
+				Type:       "vpc",
+			},
+		},
+		{
+			"tgw",
+			args{
+				listTgwAttachments[1],
+			},
+			&TgwAttachment{
+				ResourceID: "tgw-04408890ef44df3e3",
+				Type:       "peering",
+				ID:         "tgw-attach-080f3014bd52ec96f",
+			},
+		},
+		{
+			"connect",
+			args{
+				listTgwAttachments[2],
+			},
+			&TgwAttachment{
+				ResourceID: "tgw-attach-09db78f3e74abf792",
+				Type:       "connect",
+				ID:         "tgw-attach-080f3014bd52ec97f",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := newTgwAttachment(tt.args.att); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newTgw() = %v, want %v", got, tt.want)
 			}
 		})
 	}

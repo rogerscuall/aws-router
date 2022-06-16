@@ -260,16 +260,16 @@ func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 }
 
 // TgwAttachments holds the data of a Transit Gateway Attachment.
-type TgwAttachments struct {
+type TgwAttachment struct {
 	ID         string
 	ResourceID string
 	Type       string
 }
 
 // newTgwAttach builds a TgwAttachment from a aws TransitGatewayRouteAttachment type.
-func newTgwAttachments(att types.TransitGatewayRouteAttachment) *TgwAttachments {
+func newTgwAttachment(att types.TransitGatewayRouteAttachment) *TgwAttachment {
 	attType := fmt.Sprint(att.ResourceType)
-	return &TgwAttachments{
+	return &TgwAttachment{
 		ID:         *att.TransitGatewayAttachmentId,
 		ResourceID: *att.ResourceId,
 		Type:       attType,
