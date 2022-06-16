@@ -30,13 +30,19 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
+	"gitlab.presidio.com/rgomez/aws-router/aws/draw"
 )
 
-// excelCmd represents the excel command
-var excelCmd = &cobra.Command{
-	Use:   "excel",
-	Short: "Export all route tables to excel",
-	Long: `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
+// drawCmd represents the draw command
+var drawCmd = &cobra.Command{
+	Use:   "draw",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		defer func() {
@@ -44,29 +50,37 @@ var excelCmd = &cobra.Command{
 				cobra.CheckErr(err)
 			}
 		}()
-		fmt.Println("Exporting AWS routing to Excel")
+		fmt.Println("Downloading routing information from AWS")
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
 		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
-		folder, err := os.Stat("excel")
-		err = awsrouter.ExportTgwRoutesExcel(tgws, folder)
-		if err != nil {
-			fmt.Println(err)
+		folder, err := os.Stat("drawings")
+		// if folder does not exist, create it
+		if os.IsNotExist(err) {
+			err = os.Mkdir("drawings", 0755)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
-
+		for _, tgw := range tgws {
+			if err := draw.DrawTgwFull(*tgw, folder); err != nil {
+				fmt.Println("Error drawing tgw: ", tgw.Name)
+				fmt.Println(err)
+			}
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(excelCmd)
+	rootCmd.AddCommand(drawCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// excelCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// drawCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// excelCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// drawCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

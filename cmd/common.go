@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.presidio.com/rgomez/aws-router/adapters/db"
+	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 	"gitlab.presidio.com/rgomez/aws-router/ports"
-	"gitlab.presidio.com/rgomez/aws-router/types/awsrouter"
 )
 
 var dbNamePrefix string
