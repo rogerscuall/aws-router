@@ -266,7 +266,8 @@ type TgwAttachments struct {
 	Type       string
 }
 
-func newTgwAttach(att types.TransitGatewayRouteAttachment) *TgwAttachments {
+// newTgwAttach builds a TgwAttachment from a aws TransitGatewayRouteAttachment type.
+func newTgwAttachments(att types.TransitGatewayRouteAttachment) *TgwAttachments {
 	attType := fmt.Sprint(att.ResourceType)
 	return &TgwAttachments{
 		ID:         *att.TransitGatewayAttachmentId,
