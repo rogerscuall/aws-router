@@ -95,3 +95,4 @@ awsrouters.exe
 csv
 excel
 drawings/*.png
+aws/draw/testdata/*.png

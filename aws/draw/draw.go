@@ -77,10 +77,12 @@ func DrawTgwFull(tgw awsrouter.Tgw, folder fs.FileInfo) error {
 	if len(tgw.RouteTables) == 0 {
 		return fmt.Errorf("TGW has no Route Tables")
 	}
-	// if the folder does not exist return an error
-	if !folder.IsDir() {
-		return fmt.Errorf("folder does not exist")
+	// if folder is nil return an error or  the folder does not exist return an error
+	if folder == nil || !folder.IsDir() {
+		return fmt.Errorf("folder is nil")
 	}
+	
+	// initial x and y coordinates
 	x, y := float64(100), float64(100)
 	dc := CreateTgwContext(tgw)
 	// set the font
