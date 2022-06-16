@@ -140,7 +140,7 @@ var listTgwAttachments []types.TransitGatewayRouteAttachment = []types.TransitGa
 		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
 	},
 	{
-		ResourceId:                 aws.String("tgw-attach-0a0f3014bd52ec98f"),
+		ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
 		ResourceType:               "direct-connect-gateway",
 		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
 	},
