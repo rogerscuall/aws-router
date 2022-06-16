@@ -11,7 +11,7 @@ unittest:
   stage: tests
   script:
     - go install github.com/go-task/task/v3/cmd/task@latest
-    - task test
+    - task testd
 
 integrationtest:
   stage: tests
