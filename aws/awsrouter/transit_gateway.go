@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -118,4 +119,18 @@ func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	}
 
 	return tgws, nil
+}
+
+
+// GetTgwPath returns the best path TgwPath for two endpoints.
+// 
+func (t *Tgw) GetTgwPath(src, dest net.IPAddr) (*TgwPath, error) {
+	/*
+	IDEA is as follows:
+	1. loop over all the route tables.
+	2. find the best route in the route table.
+	3. find if that route points to an attachment that is on that same route table.
+	4. if it is, the route table is the closest to the address.
+	*/
+	return nil, nil
 }
