@@ -103,7 +103,7 @@ var listDescribeTransitGatewayRouteTablesOutput *ec2.DescribeTransitGatewayRoute
 var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput = &ec2.SearchTransitGatewayRoutesOutput{
 	Routes: []types.TransitGatewayRoute{
 		{
-			DestinationCidrBlock:      aws.String("10.0.0.0/24"),
+			DestinationCidrBlock:      aws.String("10.0.0.0/16"),
 			State:                     "active",
 			Type:                      "static",
 			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
@@ -584,7 +584,7 @@ func Test_newTgw(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := newTgw(tt.args.tgw); !reflect.DeepEqual(got, tt.want) {
+			if got := NewTgw(tt.args.tgw); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("newTgw() = %v, want %v", got, tt.want)
 			}
 		})

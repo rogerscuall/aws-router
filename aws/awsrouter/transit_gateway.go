@@ -20,7 +20,7 @@ type Tgw struct {
 }
 
 // Build a Tgw from a aws TGW.
-func newTgw(tgw types.TransitGateway) *Tgw {
+func NewTgw(tgw types.TransitGateway) *Tgw {
 	// t is the Tgw
 	t := &Tgw{}
 
@@ -62,9 +62,6 @@ func (t *Tgw) UpdateRouteTables(ctx context.Context, api AwsRouter) error {
 // UpdateTgwRoutes updates the routes of a route table.
 //
 // TODO: Add some sentinel error message to notify if a the calls to UpdateTgwRoutes fail.
-//
-// The call use concurrency, because on each Tgw there are multiple Route Tables.
-//
 // TODO: add testing and include race condition detection.
 //
 // Each Tgw has a list of TgwRouteTables, each RouteTable gets is own goroutine.
@@ -96,7 +93,7 @@ func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	}
 	var tgws []*Tgw
 	for _, tgw := range result.TransitGateways {
-		tgws = append(tgws, newTgw(tgw))
+		tgws = append(tgws, NewTgw(tgw))
 	}
 	return tgws, nil
 }

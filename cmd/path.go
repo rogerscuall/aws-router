@@ -22,9 +22,14 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"net"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
+	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 )
 
 // pathCmd represents the path command
@@ -39,6 +44,33 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("path called")
+		fmt.Println("args:", args)
+		var err error
+		defer func() {
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+		}()
+		sourceIPAddress := net.ParseIP(args[0])
+		if sourceIPAddress == nil {
+			cobra.CheckErr(fmt.Errorf("invalid source IP address: %s", args[0]))
+		}
+		cfg, err := config.LoadDefaultConfig(context.TODO())
+		client := ec2.NewFromConfig(cfg)
+		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-046b205ac9b96e5ae"})
+		tgwOutput, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
+		tgw := awsrouter.NewTgw(tgwOutput.TransitGateways[0])
+		fmt.Println("tgw:", tgw.ID)
+		tgw.UpdateRouteTables(context.TODO(), client)
+		tgw.UpdateTgwRoutes(context.TODO(), client)
+		for _, routeTable := range tgw.RouteTables {
+			fmt.Println("routeTable:", routeTable.ID)
+			result, err := routeTable.BestRouteToIP(sourceIPAddress)
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+			fmt.Println("result:", *result.DestinationCidrBlock)
+		}
 	},
 }
 
