@@ -11,6 +11,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 )
 
+// AwsRouter is an interface with the methods needed for routing.
+type AwsRouter interface {
+	DescribeTransitGateways(ctx context.Context, params *ec2.DescribeTransitGatewaysInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewaysOutput, error)
+	DescribeTransitGatewayRouteTables(ctx context.Context, params *ec2.DescribeTransitGatewayRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayRouteTablesOutput, error)
+	SearchTransitGatewayRoutes(ctx context.Context, params *ec2.SearchTransitGatewayRoutesInput, optFns ...func(*ec2.Options)) (*ec2.SearchTransitGatewayRoutesOutput, error)
+}
+
 // TgwInputFilter returns a filter for the DescribeTransitGatewaysInput.
 // tgwIDs is a list of Transit Gateway IDs.
 func TgwInputFilter(tgwIDs []string) *ec2.DescribeTransitGatewaysInput {
