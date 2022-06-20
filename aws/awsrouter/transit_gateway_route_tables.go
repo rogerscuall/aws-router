@@ -1,10 +1,8 @@
 package awsrouter
 
 import (
-	"context"
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
