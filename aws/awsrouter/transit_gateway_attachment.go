@@ -22,3 +22,16 @@ func newTgwAttachment(att types.TransitGatewayRouteAttachment) *TgwAttachment {
 		Type:       attType,
 	}
 }
+
+// GetAttachmentsFromTgwRoute returns a list of TgwAttachments from a aws TransitGatewayRoute type.
+func GetAttachmentsFromTgwRoute(route types.TransitGatewayRoute) []*TgwAttachment {
+	if len(route.TransitGatewayAttachments) == 0 {
+		return nil
+	}
+	var results []*TgwAttachment
+	for _, attachment := range route.TransitGatewayAttachments {
+		att := newTgwAttachment(attachment)
+		results = append(results, att)
+	}
+	return results
+}
