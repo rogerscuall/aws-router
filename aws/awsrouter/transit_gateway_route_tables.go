@@ -118,7 +118,7 @@ func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRoute
 func FindTheMostSpecificRoute(rts []TgwRouteTable, src net.IP) (net.IPNet, []TgwRouteTable, error) {
 	var subnet net.IPNet
 	var bestMask int
-	var listOfRouteTables []TgwRouteTable
+	listOfRouteTables := []TgwRouteTable{}
 	for _, rt := range rts {
 		r, err := rt.BestRouteToIP(src)
 		if err != nil {

@@ -9,6 +9,60 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 )
 
+var listOfRouteTables = []TgwRouteTable{
+	{
+		ID:   "rtb-0d7f9b0a",
+		Name: "rtb1",
+		Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[0],
+		Routes: []types.TransitGatewayRoute{
+			{
+				DestinationCidrBlock: aws.String("10.0.1.0/24"),
+				TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
+					{
+						ResourceId:   aws.String("tgw-0d7f9b0x"),
+						ResourceType: "vpc",
+					},
+				},
+				Type: "propagated",
+			},
+		},
+	},
+	{
+		ID:   "rtb-0d7f9b0b",
+		Name: "rtb2",
+		Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[1],
+		Routes: []types.TransitGatewayRoute{
+			{
+				DestinationCidrBlock: aws.String("10.0.0.0/16"),
+				TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
+					{
+						ResourceId:   aws.String("tgw-0d7f9b0x"),
+						ResourceType: "vpc",
+					},
+				},
+				Type: "propagated",
+			},
+		},
+	},
+	{
+		ID:   "rtb-0d7f9b0c",
+		Name: "rtb3",
+		Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[2],
+		Routes: []types.TransitGatewayRoute{
+			{
+				DestinationCidrBlock: aws.String("0.0.0.0/0"),
+				TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
+					{
+						ResourceId:   aws.String("tgw-0d7f9b0x"),
+						ResourceType: "vpc",
+					},
+				},
+				Type: "static",
+			},
+		},
+	},
+}
+
 func TestTgwRouteTable_Bytes(t *testing.T) {
 	type fields struct {
 		ID   string
@@ -195,6 +249,93 @@ func Test_newTgwRouteTable(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := newTgwRouteTable(tt.args.t); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("newTgwRouteTable() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTgwRouteTableSelectionPriority(t *testing.T) {
+	type args struct {
+		rts []*TgwRouteTable
+		src net.IP
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *TgwRouteTable
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := TgwRouteTableSelectionPriority(tt.args.rts, tt.args.src)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TgwRouteTableSelectionPriority() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TgwRouteTableSelectionPriority() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFindTheMostSpecificRoute(t *testing.T) {
+	_, net10, _ := net.ParseCIDR("10.0.1.0/24")
+	_, netDefault, _ := net.ParseCIDR("0.0.0.0/0")
+	type args struct {
+		rts []TgwRouteTable
+		src net.IP
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    net.IPNet
+		want1   []TgwRouteTable
+		wantErr bool
+	}{
+		{
+			name: "No Route Tables",
+			args: args{
+				rts: []TgwRouteTable{},
+			},
+			want:    net.IPNet{},
+			want1:   []TgwRouteTable{},
+			wantErr: false,
+		},
+		{
+			name: "The Most Specific Route",
+			args: args{
+				rts: listOfRouteTables,
+				src: net.ParseIP("10.0.1.1"),
+			},
+			want:    *net10,
+			want1:   []TgwRouteTable{listOfRouteTables[0]},
+			wantErr: false,
+		},
+		{
+			name: "Default Route",
+			args: args{
+				rts: listOfRouteTables,
+				src: net.ParseIP("192.168.1.1"),
+			},
+			want:    *netDefault,
+			want1:   []TgwRouteTable{listOfRouteTables[2]},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := FindTheMostSpecificRoute(tt.args.rts, tt.args.src)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FindTheMostSpecificRoute() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindTheMostSpecificRoute() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("FindTheMostSpecificRoute() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
