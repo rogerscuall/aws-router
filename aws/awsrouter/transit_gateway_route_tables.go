@@ -111,31 +111,56 @@ func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRoute
 	return nil, nil
 }
 
-// FindTheMostSpecificRoute from a list of TgwRouteTable identifies the best most specific routes to reach a destination.
-// Each Route Table can have one or more routes to reach a destination, this function will find the most specific CIDR among all the route tables.
-// If more than one route table has that specific CIDR it will be returned in []TgwRouteTable, each element in []TgwRouteTable has only the route or routes that match that most specific CIDR.
+// findBestRoutePrefix find the best route prefix from a list of TgwRouteTables to specific address
+func findBestRoutePrefix(rts []*TgwRouteTable, ipAddr net.IP) (net.IPNet, error) {
+	// brp is the best route prefix CIDR
+	var brp net.IPNet
 
-func FindTheMostSpecificRoute(rts []TgwRouteTable, src net.IP) (net.IPNet, []TgwRouteTable, error) {
-	var subnet net.IPNet
-	var bestMask int
-	listOfRouteTables := []TgwRouteTable{}
 	for _, rt := range rts {
-		r, err := rt.BestRouteToIP(src)
+		// r is the best route to an IP address
+		r, err := rt.BestRouteToIP(ipAddr)
 		if err != nil {
-			return net.IPNet{}, nil, err
+			return net.IPNet{}, err
 		}
 		if r.DestinationCidrBlock == nil {
 			continue
 		}
-		_, currentSubnet, _ := net.ParseCIDR(*r.DestinationCidrBlock)
-		currentMask, _ := currentSubnet.Mask.Size()
-		if bestMask == 0 || currentMask > bestMask {
-			subnet = *currentSubnet
-			newRT := rt
-			newRT.Routes = []types.TransitGatewayRoute{r,}
-			listOfRouteTables = append(listOfRouteTables, newRT)
-			bestMask, _ = subnet.Mask.Size()
+		_, currentSubnet, err := net.ParseCIDR(*r.DestinationCidrBlock)
+		if err != nil {
+			return net.IPNet{}, fmt.Errorf("error parsing the CIDR for %v. %w", rt.Data, err)
+		}
+		if brp.IP == nil {
+			brp = *currentSubnet
+		}
+		if brp.Contains(currentSubnet.IP) {
+			brp = *currentSubnet
 		}
 	}
-	return subnet, listOfRouteTables, nil
+	return brp, nil
+}
+
+
+// FilterRouteTableRoutesPerPrefix returns only the routes in the route table that match specific prefix.
+// The return list is created out of new TgwRouteTable structs, that copy only the matching route to the new table.
+func FilterRouteTableRoutesPerPrefix(rts []*TgwRouteTable, prefix net.IPNet) ([]TgwRouteTable, error) {
+	var result []TgwRouteTable
+	for _, rt := range rts {
+		for _, r := range rt.Routes {
+			_, currentSubnet, err := net.ParseCIDR(*r.DestinationCidrBlock)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing the CIDR for %v. %w", rt.Data, err)
+			}
+			currentSubnetMask := currentSubnet.Mask.String()
+			if currentSubnet.IP.Equal(prefix.IP) && prefix.Mask.String() == currentSubnetMask {
+				// Create a new TgwRouteTable from the current route table.
+				newRt := TgwRouteTable{
+					ID:    rt.ID,
+					Name:  rt.Name,
+					Routes: []types.TransitGatewayRoute{r,},
+				}
+				result = append(result, newRt)
+			}
+		}
+	}
+	return result, nil
 }

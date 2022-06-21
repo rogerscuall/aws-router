@@ -35,3 +35,22 @@ func GetAttachmentsFromTgwRoute(route types.TransitGatewayRoute) []*TgwAttachmen
 	}
 	return results
 }
+
+// GetDirectlyConnectedAttachmentFromTgwRoute returns the TGW Attachment that is most likely to be directly connected.
+// The rts is a list of TgwRouteTable for a single route prefix on a TGW, basically the output of FindTheMostSpecificRoute.
+// The Route Tables in rts should have only one route, that is the most specific route to a destination.
+func GetDirectlyConnectedAttachmentFromTgwRoute(rts []TgwRouteTable) []*TgwAttachment {
+	var results []*TgwAttachment
+	for _, rt := range rts {
+		r := rt.Routes[0]
+		switch r.Type {
+		case "propagated":
+			return GetAttachmentsFromTgwRoute(r)
+		case "static":
+			fmt.Println("Static route not implemented")
+		default: 
+			fmt.Println("Default case not implemented")
+		}
+	}
+	return results
+}

@@ -51,9 +51,13 @@ to quickly create a Cobra application.`,
 				cobra.CheckErr(err)
 			}
 		}()
-		sourceIPAddress := net.ParseIP(args[0])
-		if sourceIPAddress == nil {
+		srcIPAddress := net.ParseIP(args[0])
+		if srcIPAddress == nil {
 			cobra.CheckErr(fmt.Errorf("invalid source IP address: %s", args[0]))
+		}
+		dstIPAddress := net.ParseIP(args[1])
+		if dstIPAddress == nil {
+			cobra.CheckErr(fmt.Errorf("invalid destination IP address: %s", args[0]))
 		}
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
@@ -63,17 +67,8 @@ to quickly create a Cobra application.`,
 		fmt.Println("tgw:", tgw.ID)
 		tgw.UpdateRouteTables(context.TODO(), client)
 		tgw.UpdateTgwRoutes(context.TODO(), client)
-		for _, routeTable := range tgw.RouteTables {
-			fmt.Println("routeTable:", routeTable.ID)
-			result, err := routeTable.BestRouteToIP(sourceIPAddress)
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-			if result.DestinationCidrBlock != nil {
-				fmt.Println("result:", *result.DestinationCidrBlock)
-			}
-		}
-		tgw.GetTgwPath(sourceIPAddress, sourceIPAddress)
+
+		tgw.GetTgwPath(srcIPAddress, dstIPAddress)
 	},
 }
 
