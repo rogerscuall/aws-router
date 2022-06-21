@@ -25,11 +25,10 @@ func (t *TgwRouteTable) Bytes() []byte {
 
 // BestRouteToIP returns the best route to a given IP address for a given TgwRouteTable.
 // Only one route can be the best route, and is returned.
-// If no route is found, the function returns nil.
+// If no route is found, the function returns the empty TransitGatewayRoute.
 func (t TgwRouteTable) BestRouteToIP(ipAddress net.IP) (types.TransitGatewayRoute, error) {
 	// mask is the subnet mask
 	var mask net.IPMask
-
 
 	// result is the route table with the longest prefix match or the higher mask.
 	result := types.TransitGatewayRoute{}
@@ -78,4 +77,65 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 	rt.Name = name
 
 	return rt
+}
+
+// TgwRouteTableSelectionPriority select the best route table from a list of TgwRouteTables to the specific destination.
+//
+func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRouteTable, error) {
+	var srcAttachment *TgwAttachment
+	// cfg, err := config.LoadDefaultConfig(context.TODO())
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error loading config: %w", err)
+	// }
+	// client := ec2.NewFromConfig(cfg)
+	for _, rt := range rts {
+		// r is the best route to an IP address
+		r, err := rt.BestRouteToIP(src)
+		if err != nil {
+			return nil, err
+		}
+		if r.DestinationCidrBlock == nil {
+			continue
+		}
+		switch r.Type {
+		case types.TransitGatewayRouteTypePropagated:
+			srcAttachment = GetAttachmentsFromTgwRoute(r)[0]
+			break
+		case types.TransitGatewayRouteTypeStatic:
+			fmt.Println("Not implemented")
+			// find if the attachment is associated with the same route table
+			// where the route is.
+		}
+	}
+	fmt.Println("Attachment is: ", srcAttachment.ResourceID)
+	return nil, nil
+}
+
+// FindTheMostSpecificRoute from a list of TgwRouteTable identifies the best most specific routes to reach a destination.
+// Each Route Table can have one or more routes to reach a destination, this function will find the most specific CIDR among all the route tables.
+// If more than one route table has that specific CIDR it will be returned in []TgwRouteTable, each element in []TgwRouteTable has only the route or routes that match that most specific CIDR.
+
+func FindTheMostSpecificRoute(rts []TgwRouteTable, src net.IP) (net.IPNet, []TgwRouteTable, error) {
+	var subnet net.IPNet
+	var bestMask int
+	var listOfRouteTables []TgwRouteTable
+	for _, rt := range rts {
+		r, err := rt.BestRouteToIP(src)
+		if err != nil {
+			return net.IPNet{}, nil, err
+		}
+		if r.DestinationCidrBlock == nil {
+			continue
+		}
+		_, currentSubnet, _ := net.ParseCIDR(*r.DestinationCidrBlock)
+		currentMask, _ := currentSubnet.Mask.Size()
+		if bestMask == 0 || currentMask > bestMask {
+			subnet = *currentSubnet
+			newRT := rt
+			newRT.Routes = []types.TransitGatewayRoute{r,}
+			listOfRouteTables = append(listOfRouteTables, newRT)
+			bestMask, _ = subnet.Mask.Size()
+		}
+	}
+	return subnet, listOfRouteTables, nil
 }

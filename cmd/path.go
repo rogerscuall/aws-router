@@ -57,7 +57,7 @@ to quickly create a Cobra application.`,
 		}
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
-		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-046b205ac9b96e5ae"})
+		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-0424b87b4942010b0"})
 		tgwOutput, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
 		tgw := awsrouter.NewTgw(tgwOutput.TransitGateways[0])
 		fmt.Println("tgw:", tgw.ID)
@@ -69,8 +69,11 @@ to quickly create a Cobra application.`,
 			if err != nil {
 				cobra.CheckErr(err)
 			}
-			fmt.Println("result:", *result.DestinationCidrBlock)
+			if result.DestinationCidrBlock != nil {
+				fmt.Println("result:", *result.DestinationCidrBlock)
+			}
 		}
+		tgw.GetTgwPath(sourceIPAddress, sourceIPAddress)
 	},
 }
 

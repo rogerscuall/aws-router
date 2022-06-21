@@ -121,16 +121,58 @@ func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	return tgws, nil
 }
 
-
 // GetTgwPath returns the best path TgwPath for two endpoints.
-// 
-func (t *Tgw) GetTgwPath(src, dest net.IPAddr) (*TgwPath, error) {
+//
+func (t *Tgw) GetTgwPath(src, dest net.IP) (*TgwPath, error) {
 	/*
-	IDEA is as follows:
-	1. loop over all the route tables.
-	2. find the best route in the route table.
-	3. find if that route points to an attachment that is on that same route table.
-	4. if it is, the route table is the closest to the address.
+		IDEA is as follows:
+		1. loop over all the route tables.
+		2. find the best route in the route table.
+		3. find if that route points to an attachment that is on that same route table.
+		4. if it is, the route table is the closest to the address.
 	*/
+	
 	return nil, nil
 }
+
+// 	// rtAttachmet is the attachment that is on the same route table.
+// 	// it can be more than one but for other will be ignored.
+// 	// TODO: add a logic for when more than one attachment is found.
+// 	rtAttachmet := rt.TransitGatewayAttachments[0]
+// 	tmpAttachment := newTgwAttachment(rtAttachmet)
+// 	// TODO: implement logic to run depending on the attachmet type
+// 	switch tmpAttachment.Type {
+// 	case "vpc":
+// 		filter := []types.Filter{
+// 			{
+// 				Name:   aws.String("transit-gateway-attachment-id"),
+// 				Values: []string{tmpAttachment.ID},
+// 			},
+// 		}
+// 		input := &ec2.GetTransitGatewayRouteTableAssociationsInput{
+// 			Filters:                    filter,
+// 			TransitGatewayRouteTableId: aws.String(routeTable.ID),
+// 		}
+// 		result, err := client.GetTransitGatewayRouteTableAssociations(context.TODO(), input)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("error getting Transit Gateway Route Table Associations: %w", err)
+// 		}
+// 		fmt.Println("Working on Route Table:", routeTable.ID)
+// 		fmt.Println("Working on Route:", *rt.DestinationCidrBlock)
+// 		if result.Associations != nil && len(result.Associations) > 0 {
+// 			fmt.Println("Found Association is: ", *result.Associations[0].ResourceId)
+// 			fmt.Println("Expected Association is: ", tmpAttachment.ResourceID)
+// 			if *result.Associations[0].ResourceId == tmpAttachment.ResourceID {
+// 				srcAttachment = tmpAttachment
+// 				break
+// 			} else {
+// 				fmt.Println("Found Association is: ", *result.Associations[0].ResourceId)
+// 				fmt.Println("Expected Association is: ", tmpAttachment.ResourceID)
+// 			}
+// 		}
+
+// 	}
+
+// }
+// fmt.Println("Found attachment is: ", srcAttachment.ID)
+// return nil, nil
