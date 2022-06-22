@@ -1,6 +1,6 @@
 package awsrouter
 
-// TgwPath represent the path through the Transit Gateway, from the source to the destination.
+// TgwPath	 represent the path through the Transit Gateway, from the source to the destination.
 type TgwPath struct {
 	Source           TgwAttachment
 	Destination      TgwAttachment

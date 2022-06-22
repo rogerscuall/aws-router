@@ -68,7 +68,12 @@ to quickly create a Cobra application.`,
 		tgw.UpdateRouteTables(context.TODO(), client)
 		tgw.UpdateTgwRoutes(context.TODO(), client)
 
-		tgw.GetTgwPath(srcIPAddress, dstIPAddress)
+		tgwPath, err := tgw.GetTgwPath(srcIPAddress, dstIPAddress)
+		fmt.Println("Source ", tgwPath.Source)
+		fmt.Println("Destination ", tgwPath.Destination)
+		fmt.Println("TransitGatewayID ", tgwPath.TransitGatewayID)
+		fmt.Println("Path ", tgwPath.Path[0].Name)
+		fmt.Println("Path ", tgwPath.Path[1].Name)
 	},
 }
 
