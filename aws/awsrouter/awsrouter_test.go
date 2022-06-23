@@ -123,7 +123,55 @@ var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput =
 	},
 }
 
+var listGetTransitGatewayRouteTableAssociationsOutput *ec2.GetTransitGatewayRouteTableAssociationsOutput = &ec2.GetTransitGatewayRouteTableAssociationsOutput{
+	Associations: []types.TransitGatewayRouteTableAssociation{
+		{
+			ResourceId:                 aws.String("vpc-0af25be733475a425"),
+			ResourceType:               "vpc",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+		},
+		{
+			ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+			ResourceType:               "peering",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+		},
+		{
+			ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+			ResourceType:               "connect",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+		},
+		{
+			ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
+			ResourceType:               "direct-connect-gateway",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
+		},
+	},
+}
+
 var listTgwAttachments []types.TransitGatewayRouteAttachment = []types.TransitGatewayRouteAttachment{
+	{
+		ResourceId:                 aws.String("vpc-0af25be733475a425"),
+		ResourceType:               "vpc",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+		ResourceType:               "peering",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+		ResourceType:               "connect",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+	},
+	{
+		ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
+		ResourceType:               "direct-connect-gateway",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
+	},
+}
+
+var listTgwAttachmentAssociations []types.TransitGatewayRouteTableAssociation = []types.TransitGatewayRouteTableAssociation{
 	{
 		ResourceId:                 aws.String("vpc-0af25be733475a425"),
 		ResourceType:               "vpc",
@@ -214,7 +262,10 @@ func (t TgwDescriberImpl) SearchTransitGatewayRoutes(ctx context.Context, params
 	return &ec2.SearchTransitGatewayRoutesOutput{
 		Routes: tgwrts,
 	}, nil
+}
 
+func (t TgwDescriberImpl) GetTransitGatewayRouteTableAssociations(ctx context.Context, params *ec2.GetTransitGatewayRouteTableAssociationsInput, optFns ...func(*ec2.Options)) (*ec2.GetTransitGatewayRouteTableAssociationsOutput, error) {
+	return listGetTransitGatewayRouteTableAssociationsOutput, nil
 }
 
 func TestGetTgw(t *testing.T) {

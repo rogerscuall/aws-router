@@ -1,6 +1,7 @@
 package awsrouter
 
 import (
+	"context"
 	"net"
 	"reflect"
 	"testing"
@@ -311,7 +312,7 @@ func TestfindBestRoutePrefix(t *testing.T) {
 				rts: listOfRouteTables,
 				src: net10,
 			},
-			want: *sub10,
+			want:    *sub10,
 			wantErr: false,
 		},
 		{
@@ -333,6 +334,123 @@ func TestfindBestRoutePrefix(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FindBestRoutePrefix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
+	type fields struct {
+		ID          string
+		Name        string
+		Data        types.TransitGatewayRouteTable
+		Routes      []types.TransitGatewayRoute
+		Attachments []TgwAttachment
+	}
+	type args struct {
+		ctx context.Context
+		api AwsRouter
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name:   "No Attachments",
+			fields: fields{
+					ID:   "rtb-0d7f9b0a",
+					Name: "rtb1",
+					Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[0],
+					Routes: []types.TransitGatewayRoute{
+						{
+							DestinationCidrBlock: aws.String("10.0.1.0/24"),
+							TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
+								{
+									ResourceId:   aws.String("tgw-0d7f9b0x"),
+									ResourceType: "vpc",
+								},
+							},
+							Type: "propagated",
+						},
+				},
+			},
+			args: args{
+				context.TODO(),
+				TgwDescriberImpl{},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := &TgwRouteTable{
+				ID:          tt.fields.ID,
+				Name:        tt.fields.Name,
+				Data:        tt.fields.Data,
+				Routes:      tt.fields.Routes,
+				Attachments: tt.fields.Attachments,
+			}
+			if err := tr.UpdateAttachments(tt.args.ctx, tt.args.api); (err != nil) != tt.wantErr {
+				t.Errorf("TgwRouteTable.UpdateAttachments() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if len(tr.Attachments) < 1 {
+				t.Errorf("Number of attachment is less than 1 %v, wantErr %v",len(tr.Attachments) , tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_findBestRoutePrefix(t *testing.T) {
+	type args struct {
+		rts    []*TgwRouteTable
+		ipAddr net.IP
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    net.IPNet
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := findBestRoutePrefix(tt.args.rts, tt.args.ipAddr)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("findBestRoutePrefix() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("findBestRoutePrefix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFilterRouteTableRoutesPerPrefix(t *testing.T) {
+	type args struct {
+		rts    []*TgwRouteTable
+		prefix net.IPNet
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []TgwRouteTable
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := FilterRouteTableRoutesPerPrefix(tt.args.rts, tt.args.prefix)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FilterRouteTableRoutesPerPrefix() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FilterRouteTableRoutesPerPrefix() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -1,6 +1,7 @@
 package awsrouter
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -11,10 +12,11 @@ import (
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
 // Represents a Route Table of a Transit Gateway in AWS.
 type TgwRouteTable struct {
-	ID     string
-	Name   string
-	Data   types.TransitGatewayRouteTable
-	Routes []types.TransitGatewayRoute
+	ID          string
+	Name        string
+	Data        types.TransitGatewayRouteTable
+	Routes      []types.TransitGatewayRoute
+	Attachments []TgwAttachment
 }
 
 // Bytes returns the JSON representation of the TgwRouteTable as a slice of bytes.
@@ -79,6 +81,30 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 	return rt
 }
 
+// Update the attachments of a TgwRouteTable.
+func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, api AwsRouter) error {
+	// get the attachments for the route table
+	input := TgwAttachmentsInputFilter(t.ID)
+	attachments, err := GetAttachments(ctx, api, input)
+	if err != nil {
+		return err
+	}
+	if len(attachments.Associations) < 1 {
+		t.Attachments = []TgwAttachment{}
+		return nil
+	}
+	for _, a := range attachments.Associations {
+		attType := fmt.Sprint(a.ResourceType)
+		newAttachment := TgwAttachment{
+			ID:         *a.TransitGatewayAttachmentId,
+			ResourceID: *a.ResourceId,
+			Type:       attType,
+		}
+		t.Attachments = append(t.Attachments, newAttachment)
+	}
+	return nil
+}
+
 // TgwRouteTableSelectionPriority select the best route table from a list of TgwRouteTables to the specific destination.
 //
 func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRouteTable, error) {
@@ -139,8 +165,8 @@ func findBestRoutePrefix(rts []*TgwRouteTable, ipAddr net.IP) (net.IPNet, error)
 	return brp, nil
 }
 
-
 // FilterRouteTableRoutesPerPrefix returns only the routes in the route table that match specific prefix.
+// Every Route Table has only one route per prefix.
 // The return list is created out of new TgwRouteTable structs, that copy only the matching route to the new table.
 func FilterRouteTableRoutesPerPrefix(rts []*TgwRouteTable, prefix net.IPNet) ([]TgwRouteTable, error) {
 	var result []TgwRouteTable
@@ -154,9 +180,9 @@ func FilterRouteTableRoutesPerPrefix(rts []*TgwRouteTable, prefix net.IPNet) ([]
 			if currentSubnet.IP.Equal(prefix.IP) && prefix.Mask.String() == currentSubnetMask {
 				// Create a new TgwRouteTable from the current route table.
 				newRt := TgwRouteTable{
-					ID:    rt.ID,
-					Name:  rt.Name,
-					Routes: []types.TransitGatewayRoute{r,},
+					ID:     rt.ID,
+					Name:   rt.Name,
+					Routes: []types.TransitGatewayRoute{r},
 				}
 				result = append(result, newRt)
 			}
@@ -164,3 +190,5 @@ func FilterRouteTableRoutesPerPrefix(rts []*TgwRouteTable, prefix net.IPNet) ([]
 	}
 	return result, nil
 }
+
+

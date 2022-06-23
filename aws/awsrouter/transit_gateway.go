@@ -51,6 +51,7 @@ func (t *Tgw) Bytes() []byte {
 // UpdateRouteTables updates the field TgwRouteTables on a Tgw.
 // An error will stop the processing returning the error wrapped.
 func (t *Tgw) UpdateRouteTables(ctx context.Context, api AwsRouter) error {
+	// Update the Route Tables
 	inputTgwRouteTable := TgwRouteTableInputFilter([]string{t.ID})
 	resultTgwRouteTable, err := GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
 	if err != nil {
@@ -85,6 +86,17 @@ func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api AwsRouter) error {
 	}
 	wg.Wait()
 	return err
+}
+
+// UpdateTgwRouteTablesAttachments updates the Attachments of a TgwRouteTable.
+func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api AwsRouter) error {
+	for _, tgwRouteTable := range t.RouteTables {
+		err := tgwRouteTable.UpdateAttachments(ctx, api)
+		if err != nil {
+			return fmt.Errorf("error updating the route table %s %w", tgwRouteTable.ID, err)
+		}
+	}
+	return nil
 }
 
 // GetAllTgws returns a list of all the Transit Gateways in the account for specific region
@@ -168,7 +180,7 @@ func (t *Tgw) GetTgwPath(src, dest net.IP) (*TgwPath, error) {
 		Source:           *srcAtt[0],
 		Destination:      *destAtt[0],
 		TransitGatewayID: t.ID,
-		Path: 		   arrayPath,
+		Path:             arrayPath,
 	}
 
 	client := ec2.NewFromConfig(cfg)
@@ -194,4 +206,41 @@ func (t *Tgw) GetTgwPath(src, dest net.IP) (*TgwPath, error) {
 	}
 	return &path, nil
 
+}
+
+// GetDirectlyConnectedAttachment returns the route and attachment that is directly connected to the ipAddress.
+// In the case of ECMP we can have more than one attachment per route.
+// In the majority of the cases we will have only one attachment per route.
+// If we have two or more attachments this function is unable will return the first attachment and the route table associated to it.
+func (t *Tgw) GetDirectlyConnectedAttachment(ipAddress net.IP) (TgwRouteTable, []*TgwAttachment, error) {
+	var rt TgwRouteTable
+	var attachment []*TgwAttachment
+	// find the best route prefix to the ipAddress
+	prefix, err := findBestRoutePrefix(t.RouteTables, ipAddress)
+	if err != nil {
+		return rt, attachment, fmt.Errorf("error finding the best route prefix: %w", err)
+	}
+	// find the route tables that have route to the prefix
+	listRouteTable, err := FilterRouteTableRoutesPerPrefix(t.RouteTables, prefix)
+	if err != nil {
+		return rt, attachment, fmt.Errorf("error finding the route table: %w", err)
+	}
+	// find the attachment that is directly connected to the prefix
+	attachment = GetDirectlyConnectedAttachmentFromTgwRoute(listRouteTable)
+	if len(attachment) == 0 {
+		return rt, attachment, fmt.Errorf("error finding the attachment: %w", err)
+	}
+	// find the route table associated to the attachment
+	// In the case of ECMP we can have more than one attachment per route.
+	// In the majority of the cases we will have only one attachment per route.
+	// If we have two or more attachments this function is unable will return the first attachment and the route table associated to it.
+	for _, tgwRt := range t.RouteTables {
+		for _, att := range tgwRt.Attachments {
+			if att.ID == attachment[0].ID {
+				rt = *tgwRt
+				return rt, attachment, nil
+			}
+		}
+	}
+	return rt, attachment, nil
 }

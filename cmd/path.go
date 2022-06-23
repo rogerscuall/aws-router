@@ -67,13 +67,25 @@ to quickly create a Cobra application.`,
 		fmt.Println("tgw:", tgw.ID)
 		tgw.UpdateRouteTables(context.TODO(), client)
 		tgw.UpdateTgwRoutes(context.TODO(), client)
+		// Update the attachments
+		tgw.UpdateTgwRouteTablesAttachments(context.TODO(), client)
+		fmt.Println("RT Name Attach:", tgw.RouteTables[0].Name)
+		fmt.Println("RT Attach:", tgw.RouteTables[0].Attachments)
 
-		tgwPath, err := tgw.GetTgwPath(srcIPAddress, dstIPAddress)
-		fmt.Println("Source ", tgwPath.Source)
-		fmt.Println("Destination ", tgwPath.Destination)
-		fmt.Println("TransitGatewayID ", tgwPath.TransitGatewayID)
-		fmt.Println("Path ", tgwPath.Path[0].Name)
-		fmt.Println("Path ", tgwPath.Path[1].Name)
+		// Get the directly connected attachment for the source and destination IP address
+		srcRt, srcAtts, err := tgw.GetDirectlyConnectedAttachment(srcIPAddress)
+		dstRt, dstAtts, err := tgw.GetDirectlyConnectedAttachment(dstIPAddress)
+
+		fmt.Println("srcRt:", srcRt.Name)
+		fmt.Println("dstRt:", dstRt.Name)
+		fmt.Println("srcAtts:", srcAtts[0].ID)
+		fmt.Println("dstAtts:", dstAtts[0].ID)
+		// tgwPath, err := tgw.GetTgwPath(srcIPAddress, dstIPAddress)
+		// fmt.Println("Source ", tgwPath.Source)
+		// fmt.Println("Destination ", tgwPath.Destination)
+		// fmt.Println("TransitGatewayID ", tgwPath.TransitGatewayID)
+		// fmt.Println("Path ", tgwPath.Path[0].Name)
+		// fmt.Println("Path ", tgwPath.Path[1].Name)
 	},
 }
 

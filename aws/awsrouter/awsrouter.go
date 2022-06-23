@@ -16,6 +16,7 @@ type AwsRouter interface {
 	DescribeTransitGateways(ctx context.Context, params *ec2.DescribeTransitGatewaysInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewaysOutput, error)
 	DescribeTransitGatewayRouteTables(ctx context.Context, params *ec2.DescribeTransitGatewayRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayRouteTablesOutput, error)
 	SearchTransitGatewayRoutes(ctx context.Context, params *ec2.SearchTransitGatewayRoutesInput, optFns ...func(*ec2.Options)) (*ec2.SearchTransitGatewayRoutesOutput, error)
+	GetTransitGatewayRouteTableAssociations(ctx context.Context, params *ec2.GetTransitGatewayRouteTableAssociationsInput, optFns ...func(*ec2.Options)) (*ec2.GetTransitGatewayRouteTableAssociationsOutput, error)
 }
 
 // TgwInputFilter returns a filter for the DescribeTransitGatewaysInput.
@@ -88,4 +89,24 @@ func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *e
 //GetTgwRoutes returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
 func GetTgwRoutes(ctx context.Context, api AwsRouter, input *ec2.SearchTransitGatewayRoutesInput) (*ec2.SearchTransitGatewayRoutesOutput, error) {
 	return api.SearchTransitGatewayRoutes(ctx, input)
+}
+
+func TgwAttachmentsInputFilter(tgwRtID string, attachmentFilters ...types.Filter) *ec2.GetTransitGatewayRouteTableAssociationsInput {
+	var filters []types.Filter
+	//default filter if no filters are provided
+	if len(attachmentFilters) != 0 {
+		for _, filter := range attachmentFilters {
+			filters = append(filters, filter)
+		}
+	}
+
+	input := &ec2.GetTransitGatewayRouteTableAssociationsInput{
+		Filters:                    filters,
+		TransitGatewayRouteTableId: aws.String(tgwRtID),
+	}
+	return input
+}
+
+func GetAttachments(ctx context.Context, api AwsRouter, input *ec2.GetTransitGatewayRouteTableAssociationsInput) (*ec2.GetTransitGatewayRouteTableAssociationsOutput, error) {
+	return api.GetTransitGatewayRouteTableAssociations(ctx, input)
 }
