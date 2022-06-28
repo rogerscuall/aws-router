@@ -16,7 +16,7 @@ variables:
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
 
 unittest:
-  stage: testshttps://gitlab.presidio.com/api/v4/projects/2228/packages/go/0.1.0/awsrouters
+  stage: tests
   script:
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task testd
