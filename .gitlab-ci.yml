@@ -6,6 +6,7 @@ image:
 stages:
   - tests
   - build
+  - release
 
 unittest:
   stage: tests
@@ -44,3 +45,21 @@ build:
       - "awsrouters"
       - "awsrouters.exe"
       - "awsrouters-linux"
+
+release:
+  stage: release
+  script:
+    - echo 'running release_job'
+    - echo 'Previous Job ID is printed below'
+    - echo $GE_JOB_ID
+  needs:
+    - build
+      artifacts: true
+  release:
+    tag_name: "$CI_COMMIT_SHORT_SHA"
+    description: "Release $CI_COMMIT_SHORT_SHA"
+    name: "Release $CI_COMMIT_SHORT_SHA"
+    assets:
+      links:
+        - name: "Linux Release"
+          url: "https://gitlab.presidio.com/rgomez/aws-router/-/jobs/${GE_JOB_ID}/artifacts/raw/awsrouters-linux"
