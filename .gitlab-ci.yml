@@ -6,7 +6,6 @@ image:
 stages:
   #- tests
   - build
-  - release
 
 
 variables:
@@ -16,30 +15,30 @@ variables:
   WINDOWS_BINARY: "awsrouters.exe"
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
 
-# unittest:
-#   stage: testshttps://gitlab.presidio.com/api/v4/projects/2228/packages/go/0.1.0/awsrouters
-#   script:
-#     - go install github.com/go-task/task/v3/cmd/task@latest
-#     - task testd
+unittest:
+  stage: testshttps://gitlab.presidio.com/api/v4/projects/2228/packages/go/0.1.0/awsrouters
+  script:
+    - go install github.com/go-task/task/v3/cmd/task@latest
+    - task testd
 
-# integrationtest:
-#   stage: tests
-#   script:
-#     - go install gitlab.presidio.com/rgomez/aws-router
-#     - mkdir csv
-#     - aws-router
-#     - mkdir excel
-#     - aws-router excel
-#     - touch .go-aws-routing.yaml
-#     - >
-#       echo "db_Name: testing-db123" > .go-aws-routing.yaml
-#     - aws-router sync
-#   tags:
-#     - aws
-#   artifacts:
-#     paths: 
-#       - csv
-#       - excel
+integrationtest:
+  stage: tests
+  script:
+    - go install gitlab.presidio.com/rgomez/aws-router
+    - mkdir csv
+    - aws-router
+    - mkdir excel
+    - aws-router excel
+    - touch .go-aws-routing.yaml
+    - >
+      echo "db_Name: testing-db123" > .go-aws-routing.yaml
+    - aws-router sync
+  tags:
+    - aws
+  artifacts:
+    paths: 
+      - csv
+      - excel
 
 build:
   stage: build
@@ -47,65 +46,10 @@ build:
     - echo "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task build
-    - mkdir -p bin
-    - mv awsrouters bin/awsrouters
-    # - task buildlinux
-    # - task buildwindows
-    
-    # - |
-    #   curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
+    - task buildlinux
+    - task buildwindows
   artifacts:
     paths:
-      - bin
-      # - builds/"${LINUX_AMD64_BINARY}"
-      # - builds/"${LINUX_AMD64_BINARY}"
-
-release:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  script:
-    - echo 'running release_job'
-    - echo 'Previous Job ID is printed below'
-    - echo $GE_JOB_ID
-  needs:
-    - job: build
-      artifacts: true
-  release:
-    tag_name: "${PACKAGE_VERSION}"
-    description: "Something about release"
-    assets:
-      links:
-        - name: 'MAC executable'
-          url: https://gitlab.presidio.com/rgomez/awsrouter/-/jobs/${GE_JOB_ID}/artifacts/raw/bin/awsrouters
-
-
-# upload:
-#   stage: upload
-#   image: curlimages/curl:latest
-#   # rules:
-#   #   - if: $CI_COMMIT_TAG
-#   script:
-#     - ls
-#     - |
-#       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
-    # - |
-    #   curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${LINUX_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}"
-    # - |
-    #   curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${WINDOWS_BINARY} "${PACKAGE_REGISTRY_URL}/${WINDOWS_BINARY}"
-# release:
-#   stage: release
-#   script:
-#     - echo 'running release_job'
-#     - echo 'Previous Job ID is printed below'
-#     - echo $GE_JOB_ID
-#   needs:
-#     - build
-#       artifacts: true
-#   release:
-#     tag_name: "$CI_COMMIT_SHORT_SHA"
-#     description: "Release $CI_COMMIT_SHORT_SHA"
-#     name: "Release $CI_COMMIT_SHORT_SHA"
-#     assets:
-#       links:
-#         - name: "Linux Release"
-#           url: "https://gitlab.presidio.com/rgomez/aws-router/-/jobs/${GE_JOB_ID}/artifacts/raw/awsrouters-linux"
+      - "awsrouters"
+      - "awsrouters.exe"
+      - "awsrouters-linux"
