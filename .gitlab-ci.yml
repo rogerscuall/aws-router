@@ -6,7 +6,7 @@ image:
 stages:
   #- tests
   - build
-  #- upload
+  - release
 
 
 variables:
@@ -17,7 +17,7 @@ variables:
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
 
 # unittest:
-#   stage: tests
+#   stage: testshttps://gitlab.presidio.com/api/v4/projects/2228/packages/go/0.1.0/awsrouters
 #   script:
 #     - go install github.com/go-task/task/v3/cmd/task@latest
 #     - task testd
@@ -47,16 +47,27 @@ build:
     - echo "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task build
+    - mkdir awsrouters bin/awsrouters
     # - task buildlinux
     # - task buildwindows
     
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
+    # - |
+    #   curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
   artifacts:
     paths:
-      - "${DARWIN_AMD64_BINARY}"
+      - bin
       # - builds/"${LINUX_AMD64_BINARY}"
       # - builds/"${LINUX_AMD64_BINARY}"
+
+release:
+  image: registry.gitlab.com/gitlab-org/release-cli
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - echo "upload binaries and create release"
+    - >
+      release-cli --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG --upload-dir=bin/
 
 # upload:
 #   stage: upload
