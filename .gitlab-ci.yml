@@ -4,7 +4,7 @@ image:
     - "/usr/bin/env"
     - "PATH=/go/bin:/usr/local/go/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 stages:
-  - tests
+  #- tests
   - build
   - upload
 
@@ -13,32 +13,33 @@ variables:
   PACKAGE_VERSION: "0.1.0"
   DARWIN_AMD64_BINARY: "awsrouters"
   LINUX_AMD64_BINARY: "awsrouters-linux"
-  #WINDOWS_BINARY: 
+  WINDOWS_BINARY: "awsrouters.exe"
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
-unittest:
-  stage: tests
-  script:
-    - go install github.com/go-task/task/v3/cmd/task@latest
-    - task testd
 
-integrationtest:
-  stage: tests
-  script:
-    - go install gitlab.presidio.com/rgomez/aws-router
-    - mkdir csv
-    - aws-router
-    - mkdir excel
-    - aws-router excel
-    - touch .go-aws-routing.yaml
-    - >
-      echo "db_Name: testing-db123" > .go-aws-routing.yaml
-    - aws-router sync
-  tags:
-    - aws
-  artifacts:
-    paths: 
-      - csv
-      - excel
+# unittest:
+#   stage: tests
+#   script:
+#     - go install github.com/go-task/task/v3/cmd/task@latest
+#     - task testd
+
+# integrationtest:
+#   stage: tests
+#   script:
+#     - go install gitlab.presidio.com/rgomez/aws-router
+#     - mkdir csv
+#     - aws-router
+#     - mkdir excel
+#     - aws-router excel
+#     - touch .go-aws-routing.yaml
+#     - >
+#       echo "db_Name: testing-db123" > .go-aws-routing.yaml
+#     - aws-router sync
+#   tags:
+#     - aws
+#   artifacts:
+#     paths: 
+#       - csv
+#       - excel
 
 build:
   stage: build
@@ -47,11 +48,15 @@ build:
     - task build
     - task buildlinux
     - task buildwindows
+    - mkdir builds
+    - mv "${DARWIN_AMD64_BINARY}" builds
+    - mv "${LINUX_AMD64_BINARY}" builds
+    - mv "${WINDOWS_BINARY}" builds
   artifacts:
     paths:
-      - "${DARWIN_AMD64_BINARY}"
-      - "awsrouters.exe"
-      - "${LINUX_AMD64_BINARY}"
+      - builds/"${DARWIN_AMD64_BINARY}"
+      - builds/"${LINUX_AMD64_BINARY}"
+      - builds/"${LINUX_AMD64_BINARY}"
 
 upload:
   stage: upload
@@ -60,9 +65,11 @@ upload:
   #   - if: $CI_COMMIT_TAG
   script:
     - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${LINUX_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}"
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${LINUX_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${WINDOWS_BINARY} "${PACKAGE_REGISTRY_URL}/${WINDOWS_BINARY}"
 # release:
 #   stage: release
 #   script:
