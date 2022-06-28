@@ -6,7 +6,7 @@ image:
 stages:
   - tests
   - build
-  - release
+  - upload
 
 
 variables:
