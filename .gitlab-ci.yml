@@ -63,13 +63,14 @@ build:
 release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli
+  upload-dir:
+    - bin
   needs:
     - job: build
       artifacts: true
-  script:
-    - echo "upload binaries and create release"
-    - >
-      release-cli create --name "Release $PACKAGE_VERSION" --tag-name $PACKAGE_VERSION --upload-dir=bin/
+  release:
+    tag_name: "${PACKAGE_VERSION}"
+    description: "Something about release"
 
 # upload:
 #   stage: upload
