@@ -49,9 +49,9 @@ build:
     - task buildlinux
     - task buildwindows
     - mkdir builds
-    - mv "${DARWIN_AMD64_BINARY}" builds
-    - mv "${LINUX_AMD64_BINARY}" builds
-    - mv "${WINDOWS_BINARY}" builds
+    - mv "${DARWIN_AMD64_BINARY}" builds/"${DARWIN_AMD64_BINARY}"
+    - mv "${LINUX_AMD64_BINARY}" builds/"${LINUX_AMD64_BINARY}"
+    - mv "${WINDOWS_BINARY}" builds/"${WINDOWS_BINARY}"
   artifacts:
     paths:
       - builds/"${DARWIN_AMD64_BINARY}"
@@ -64,6 +64,7 @@ upload:
   # rules:
   #   - if: $CI_COMMIT_TAG
   script:
+    - ls
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file builds/${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - |
