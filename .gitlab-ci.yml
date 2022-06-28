@@ -47,7 +47,8 @@ build:
     - echo "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task build
-    - mkdir awsrouters bin/awsrouters
+    - mkdir -p bin
+    - mv awsrouters bin/awsrouters
     # - task buildlinux
     # - task buildwindows
     
