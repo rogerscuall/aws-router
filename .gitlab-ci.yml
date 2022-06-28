@@ -60,6 +60,7 @@ build:
       # - builds/"${LINUX_AMD64_BINARY}"
 
 release:
+  stage: release
   image: registry.gitlab.com/gitlab-org/release-cli
   needs:
     - job: build
