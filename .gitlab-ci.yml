@@ -62,15 +62,22 @@ build:
 
 release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli
-  upload-dir:
-    - bin
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - echo 'running release_job'
+    - echo 'Previous Job ID is printed below'
+    - echo $GE_JOB_ID
   needs:
     - job: build
       artifacts: true
   release:
     tag_name: "${PACKAGE_VERSION}"
     description: "Something about release"
+    assets:
+      links:
+        - name: 'MAC executable'
+          url: https://gitlab.presidio.com/rgomez/awsrouter/-/jobs/${GE_JOB_ID}/artifacts/raw/bin/awsrouters
+
 
 # upload:
 #   stage: upload
