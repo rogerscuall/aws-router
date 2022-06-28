@@ -8,6 +8,13 @@ stages:
   - build
   - release
 
+
+variables:
+  PACKAGE_VERSION: "0.1.0"
+  DARWIN_AMD64_BINARY: "awsrouters"
+  LINUX_AMD64_BINARY: "awsrouters-linux"
+  #WINDOWS_BINARY: 
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
 unittest:
   stage: tests
   script:
@@ -42,24 +49,34 @@ build:
     - task buildwindows
   artifacts:
     paths:
-      - "awsrouters"
+      - "${DARWIN_AMD64_BINARY}"
       - "awsrouters.exe"
-      - "awsrouters-linux"
+      - "${LINUX_AMD64_BINARY}"
 
-release:
-  stage: release
+upload:
+  stage: upload
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_TAG
   script:
-    - echo 'running release_job'
-    - echo 'Previous Job ID is printed below'
-    - echo $GE_JOB_ID
-  needs:
-    - build
-      artifacts: true
-  release:
-    tag_name: "$CI_COMMIT_SHORT_SHA"
-    description: "Release $CI_COMMIT_SHORT_SHA"
-    name: "Release $CI_COMMIT_SHORT_SHA"
-    assets:
-      links:
-        - name: "Linux Release"
-          url: "https://gitlab.presidio.com/rgomez/aws-router/-/jobs/${GE_JOB_ID}/artifacts/raw/awsrouters-linux"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${LINUX_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}"
+# release:
+#   stage: release
+#   script:
+#     - echo 'running release_job'
+#     - echo 'Previous Job ID is printed below'
+#     - echo $GE_JOB_ID
+#   needs:
+#     - build
+#       artifacts: true
+#   release:
+#     tag_name: "$CI_COMMIT_SHORT_SHA"
+#     description: "Release $CI_COMMIT_SHORT_SHA"
+#     name: "Release $CI_COMMIT_SHORT_SHA"
+#     assets:
+#       links:
+#         - name: "Linux Release"
+#           url: "https://gitlab.presidio.com/rgomez/aws-router/-/jobs/${GE_JOB_ID}/artifacts/raw/awsrouters-linux"
