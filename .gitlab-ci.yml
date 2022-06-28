@@ -69,7 +69,7 @@ release:
   script:
     - echo "upload binaries and create release"
     - >
-      release-cli --name "Release $PACKAGE_VERSION" --tag-name $PACKAGE_VERSION --upload-dir=bin/
+      release-cli create --name "Release $PACKAGE_VERSION" --tag-name $PACKAGE_VERSION --upload-dir=bin/
 
 # upload:
 #   stage: upload
