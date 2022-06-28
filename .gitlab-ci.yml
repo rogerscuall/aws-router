@@ -44,15 +44,17 @@ variables:
 build:
   stage: build
   script:
+    - echo "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task build
-    - task buildlinux
-    - task buildwindows
+    # - task buildlinux
+    # - task buildwindows
+    
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${DARWIN_AMD64_BINARY} "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
   artifacts:
     paths:
-      - builds/"${DARWIN_AMD64_BINARY}"
+      - "${DARWIN_AMD64_BINARY}"
       # - builds/"${LINUX_AMD64_BINARY}"
       # - builds/"${LINUX_AMD64_BINARY}"
 
