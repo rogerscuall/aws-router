@@ -7,11 +7,19 @@ stages:
   - tests
   - build
 
+
+variables:
+  PACKAGE_VERSION: "0.1.0"
+  DARWIN_AMD64_BINARY: "awsrouters"
+  LINUX_AMD64_BINARY: "awsrouters-linux"
+  WINDOWS_BINARY: "awsrouters.exe"
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/2228/packages/go/${PACKAGE_VERSION}"
+
 unittest:
   stage: tests
   script:
     - go install github.com/go-task/task/v3/cmd/task@latest
-    - task test
+    - task testd
 
 integrationtest:
   stage: tests
@@ -35,6 +43,7 @@ integrationtest:
 build:
   stage: build
   script:
+    - echo "${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}"
     - go install github.com/go-task/task/v3/cmd/task@latest
     - task build
     - task buildlinux

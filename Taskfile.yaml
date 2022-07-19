@@ -3,6 +3,9 @@ version: "3"
 tasks:
   test:
     cmds:
+      - go test -cover ./...
+  testd:
+    cmds:
       - go test -cover -v ./...
   race:
     cmds:

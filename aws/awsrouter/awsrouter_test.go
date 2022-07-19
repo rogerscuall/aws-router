@@ -52,19 +52,19 @@ var listDescribeTransitGatewaysOutput *ec2.DescribeTransitGatewaysOutput = &ec2.
 
 var listTgw []*Tgw = []*Tgw{
 	{
-		ID:    "tgw-0d7f9b0a",
-		Name:  "testA",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[0],
+		ID:   "tgw-0d7f9b0a",
+		Name: "testA",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[0],
 	},
 	{
-		ID:    "tgw-0d7f9b0b",
-		Name:  "testB",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[1],
+		ID:   "tgw-0d7f9b0b",
+		Name: "testB",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[1],
 	},
 	{
-		ID: "tgw-0d7f9b0c",
-		Name:  "testC",
-		Data:  listDescribeTransitGatewaysOutput.TransitGateways[2],
+		ID:   "tgw-0d7f9b0c",
+		Name: "testC",
+		Data: listDescribeTransitGatewaysOutput.TransitGateways[2],
 	},
 }
 
@@ -103,7 +103,7 @@ var listDescribeTransitGatewayRouteTablesOutput *ec2.DescribeTransitGatewayRoute
 var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput = &ec2.SearchTransitGatewayRoutesOutput{
 	Routes: []types.TransitGatewayRoute{
 		{
-			DestinationCidrBlock:      aws.String("10.0.0.0/24"),
+			DestinationCidrBlock:      aws.String("10.0.0.0/16"),
 			State:                     "active",
 			Type:                      "static",
 			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
@@ -120,6 +120,77 @@ var listSearchTransitGatewayRoutesOutput *ec2.SearchTransitGatewayRoutesOutput =
 			Type:                      "static",
 			TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{},
 		},
+	},
+}
+
+var listGetTransitGatewayRouteTableAssociationsOutput *ec2.GetTransitGatewayRouteTableAssociationsOutput = &ec2.GetTransitGatewayRouteTableAssociationsOutput{
+	Associations: []types.TransitGatewayRouteTableAssociation{
+		{
+			ResourceId:                 aws.String("vpc-0af25be733475a425"),
+			ResourceType:               "vpc",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+		},
+		{
+			ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+			ResourceType:               "peering",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+		},
+		{
+			ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+			ResourceType:               "connect",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+		},
+		{
+			ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
+			ResourceType:               "direct-connect-gateway",
+			TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
+		},
+	},
+}
+
+var listTgwAttachments []types.TransitGatewayRouteAttachment = []types.TransitGatewayRouteAttachment{
+	{
+		ResourceId:                 aws.String("vpc-0af25be733475a425"),
+		ResourceType:               "vpc",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+		ResourceType:               "peering",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+		ResourceType:               "connect",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+	},
+	{
+		ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
+		ResourceType:               "direct-connect-gateway",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
+	},
+}
+
+var listTgwAttachmentAssociations []types.TransitGatewayRouteTableAssociation = []types.TransitGatewayRouteTableAssociation{
+	{
+		ResourceId:                 aws.String("vpc-0af25be733475a425"),
+		ResourceType:               "vpc",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec95f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-04408890ef44df3e3"),
+		ResourceType:               "peering",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec96f"),
+	},
+	{
+		ResourceId:                 aws.String("tgw-attach-09db78f3e74abf792"),
+		ResourceType:               "connect",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec97f"),
+	},
+	{
+		ResourceId:                 aws.String("3c1a5494-3491-481d-b82d-7e2c61204f3f"),
+		ResourceType:               "direct-connect-gateway",
+		TransitGatewayAttachmentId: aws.String("tgw-attach-080f3014bd52ec99f"),
 	},
 }
 
@@ -191,7 +262,10 @@ func (t TgwDescriberImpl) SearchTransitGatewayRoutes(ctx context.Context, params
 	return &ec2.SearchTransitGatewayRoutesOutput{
 		Routes: tgwrts,
 	}, nil
+}
 
+func (t TgwDescriberImpl) GetTransitGatewayRouteTableAssociations(ctx context.Context, params *ec2.GetTransitGatewayRouteTableAssociationsInput, optFns ...func(*ec2.Options)) (*ec2.GetTransitGatewayRouteTableAssociationsOutput, error) {
+	return listGetTransitGatewayRouteTableAssociationsOutput, nil
 }
 
 func TestGetTgw(t *testing.T) {
@@ -561,7 +635,7 @@ func Test_newTgw(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := newTgw(tt.args.tgw); !reflect.DeepEqual(got, tt.want) {
+			if got := NewTgw(tt.args.tgw); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("newTgw() = %v, want %v", got, tt.want)
 			}
 		})
@@ -599,6 +673,58 @@ func TestGetAllTgws(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetAllTgws() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_newTgwAttachments(t *testing.T) {
+	type args struct {
+		att types.TransitGatewayRouteAttachment
+	}
+	tests := []struct {
+		name string
+		args args
+		want *TgwAttachment
+	}{
+		{
+			"vpc",
+			args{
+				listTgwAttachments[0],
+			},
+			&TgwAttachment{
+				ID:         "tgw-attach-080f3014bd52ec95f",
+				ResourceID: "vpc-0af25be733475a425",
+				Type:       "vpc",
+			},
+		},
+		{
+			"tgw",
+			args{
+				listTgwAttachments[1],
+			},
+			&TgwAttachment{
+				ResourceID: "tgw-04408890ef44df3e3",
+				Type:       "peering",
+				ID:         "tgw-attach-080f3014bd52ec96f",
+			},
+		},
+		{
+			"connect",
+			args{
+				listTgwAttachments[2],
+			},
+			&TgwAttachment{
+				ResourceID: "tgw-attach-09db78f3e74abf792",
+				Type:       "connect",
+				ID:         "tgw-attach-080f3014bd52ec97f",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := newTgwAttachment(tt.args.att); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newTgw() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -1,13 +1,13 @@
 package awsrouter
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io/fs"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
-
 
 // getNamesFromTags returns the name tags if exist, if not it will signal with an error.
 func GetNamesFromTags(tags []types.Tag) (string, error) {
@@ -60,6 +60,21 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 		fileName := fmt.Sprintf("%s/%s.xlsx", folderName, tgw.Name)
 		if err := f.SaveAs(fileName); err != nil {
 			return fmt.Errorf("error saving excel: %w", err)
+		}
+	}
+	return nil
+}
+
+// ExportRouteTableRoutesCsv creates a CSV with all the routes in one Tgw Route Table.
+func ExportRouteTableRoutesCsv(w *csv.Writer, tgwrt TgwRouteTable) error {
+	defer w.Flush()
+	w.Write([]string{"Destination CIDR Block", "State", "Type"})
+	for _, route := range tgwrt.Routes {
+		state := fmt.Sprint(route.State)
+		routeType := fmt.Sprint(route.Type)
+		err := w.Write([]string{*route.DestinationCidrBlock, state, routeType})
+		if err != nil {
+			return fmt.Errorf("error writing to csv: %w", err)
 		}
 	}
 	return nil
