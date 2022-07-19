@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/alexeyco/simpletable"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/fatih/color"
 )
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
@@ -191,4 +193,60 @@ func FilterRouteTableRoutesPerPrefix(rts []*TgwRouteTable, prefix net.IPNet) ([]
 	return result, nil
 }
 
+// PrintRoutesInTable creates a table to print the routes in a route table.
+func (t *TgwRouteTable) PrintRoutesInTable() {
+	// Header Color
+	headerColor := color.New(color.FgBlue, color.Bold)
 
+	table := simpletable.New()
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: headerColor.Sprint("Destination CIDR")},
+			{Align: simpletable.AlignCenter, Text: headerColor.Sprint("State")},
+			{Align: simpletable.AlignCenter, Text: headerColor.Sprint("Route Type")},
+			{Align: simpletable.AlignCenter, Text: headerColor.Sprint("Prefix List")},
+		},
+	}
+	// Blackhole routes color
+	blackholeColor := color.New(color.FgHiRed, color.Italic)
+	// Regular routes color
+	regularColor := color.New(color.FgHiGreen, color.Bold)
+	for _, route := range t.Routes {
+		dstCidr := *route.DestinationCidrBlock
+		state := fmt.Sprint(route.State)
+		routeType := fmt.Sprint(route.Type)
+		prefixList := "-"
+		if route.PrefixListId != nil {
+			prefixList = fmt.Sprint(*route.PrefixListId)
+		}
+		if route.PrefixListId == nil {
+			prefixList = "-"
+		}
+		if state == "active" {
+			state = regularColor.Sprint(state)
+			dstCidr = regularColor.Sprint(dstCidr)
+			routeType = regularColor.Sprint(routeType)
+			prefixList = regularColor.Sprint(prefixList)
+		} else {
+			state = blackholeColor.Sprint(state)
+			dstCidr = blackholeColor.Sprint(dstCidr)
+			routeType = blackholeColor.Sprint(routeType)
+			prefixList = blackholeColor.Sprint(prefixList)
+
+		}
+
+		row := []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: dstCidr},
+			{Align: simpletable.AlignCenter, Text: state},
+			{Align: simpletable.AlignCenter, Text: routeType},
+			{Align: simpletable.AlignCenter, Text: prefixList},
+		}
+		table.Body.Cells = append(table.Body.Cells, row)
+	}
+	table.Footer = &simpletable.Footer{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Span: 4, Text: headerColor.Sprintf("Route Table Name: %v", t.Name)},
+		},
+	}
+	fmt.Println(table.String())
+}
