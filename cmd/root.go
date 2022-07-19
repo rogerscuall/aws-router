@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/csv"
 	"fmt"
 	"os"
 
@@ -40,7 +39,8 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "awsrouters",
-	Short: "Extracts all routing information from AWS and save it to a CSV file",
+	Short: "Extracts all routing information from AWS and prints a table to console",
+	Long:  `Extracts all routing information from AWS and prints a table to console`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
@@ -50,24 +50,19 @@ var rootCmd = &cobra.Command{
 				cobra.CheckErr(err)
 			}
 		}()
-		fmt.Println("Exporting AWS routing to CSV")
+		fmt.Println("Downloading Routing Information...")
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
 		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
 
-		// Create a csv writer and export one route table
 		for _, tgw := range tgws {
-			for _, tgwRouteTable := range tgw.RouteTables {
-				w, err := os.Create("csv/" + tgwRouteTable.Name + ".csv")
-				if err != nil {
-					cobra.CheckErr(err)
+			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
+			if len(tgw.RouteTables) > 0 {
+				for _, routeTable := range tgw.RouteTables {
+					routeTable.PrintRoutesInTable()
 				}
-				defer w.Close()
-				writer := csv.NewWriter(w)
-				err = awsrouter.ExportRouteTableRoutesCsv(writer, *tgwRouteTable)
-				if err != nil {
-					cobra.CheckErr(err)
-				}
+			} else {
+				fmt.Println("No Route Tables found")
 			}
 		}
 	},

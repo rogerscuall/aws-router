@@ -60,12 +60,12 @@ func GetTgwRouteTables(ctx context.Context, api AwsRouter, input *ec2.DescribeTr
 
 // TgwSearchRoutesInputFilter returns a filter for the SearchTransitGatewayRoutes.
 // tgwRtID is the Transit Gateway Route Table ID.
-// routeFilters is an optional list of filters used to specify routes matching operations.
+// routeFilters is an optional list of filters used to specify routes matching operations
 // like longest-prefix-match, prefix-match, or exact-match.
-// filters are analyzed like a logical AND if more than one is specified.
+// If the routeFilters is empty, the default filter is used to match active and blackhole routes.
+// Active and blackhole routes are should be all the routes that affect the routing inside a route table.
 
 func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *ec2.SearchTransitGatewayRoutesInput {
-	// TODO: filters are analyzed like a logical AND if more than one is specified, not sure if makes sense for routing to have more than one.
 	var filters []types.Filter
 	//default filter if no filters are provided
 	if len(routeFilters) == 0 {
@@ -73,6 +73,10 @@ func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *e
 			{
 				Name:   aws.String("state"),
 				Values: []string{"active"},
+			},
+			{
+				Name:   aws.String("state"),
+				Values: []string{"blackhole"},
 			},
 		}
 	}
