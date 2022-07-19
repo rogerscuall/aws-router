@@ -557,6 +557,10 @@ func TestTgwSearchRoutesInputFilter(t *testing.T) {
 						Name:   aws.String("state"),
 						Values: []string{"active"},
 					},
+					{
+						Name:   aws.String("state"),
+						Values: []string{"blackhole"},
+					},
 				},
 				TransitGatewayRouteTableId: aws.String("rtb-0d7f9b0c"),
 			},
