@@ -2,6 +2,7 @@ package awsrouter
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
@@ -48,9 +49,49 @@ func GetDirectlyConnectedAttachmentFromTgwRoute(rts []TgwRouteTable) []*TgwAttac
 			return GetAttachmentsFromTgwRoute(r)
 		case "static":
 			fmt.Println("Static route not implemented")
-		default: 
+		default:
 			fmt.Println("Default case not implemented")
 		}
 	}
 	return results
+}
+
+type AttPath struct {
+	Path          []*TgwAttachment
+	SrcRouteTable TgwRouteTable
+	DstRouteTable TgwRouteTable
+	Tgw 		 *Tgw
+}
+
+// Walk will do a packet walk from the src to dst and updates the field Path.
+// The function needs a attPath that has at least the source attachment.
+func (attPath *AttPath) Walk(src, dst net.IP) error {
+	srcRt, srcAtts, err := attPath.Tgw.GetDirectlyConnectedAttachment(src)
+	if err != nil {
+		return err
+	}
+	dstRt, dstAtts, err := attPath.Tgw.GetDirectlyConnectedAttachment(dst)
+	if err != nil {
+		return err
+	}
+	attPath.Path = append(attPath.Path, srcAtts[0])
+	attPath.SrcRouteTable = srcRt
+	attPath.DstRouteTable = dstRt
+	tgwRt := srcRt
+	for i := 0; i < 10; i++ {
+		route, err := tgwRt.BestRouteToIP(dst)
+		if err != nil {
+			return err
+		}
+		if route.DestinationCidrBlock == nil {
+			return fmt.Errorf("No route found available to walk")
+		}
+		att := newTgwAttachment(route.TransitGatewayAttachments[0])
+		attPath.Path = append(attPath.Path, att)
+		if att.ID == dstAtts[0].ResourceID {
+			// We reach the destination attachment
+			break
+		}
+	}
+	return nil
 }

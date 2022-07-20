@@ -61,7 +61,7 @@ to quickly create a Cobra application.`,
 		}
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
-		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-0424b87b4942010b0"})
+		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-05ab7c84b875cfdec"})
 		tgwOutput, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
 		tgw := awsrouter.NewTgw(tgwOutput.TransitGateways[0])
 		fmt.Println("tgw:", tgw.ID)
@@ -80,12 +80,14 @@ to quickly create a Cobra application.`,
 		fmt.Println("dstRt:", dstRt.Name)
 		fmt.Println("srcAtts:", srcAtts[0].ID)
 		fmt.Println("dstAtts:", dstAtts[0].ID)
-		// tgwPath, err := tgw.GetTgwPath(srcIPAddress, dstIPAddress)
-		// fmt.Println("Source ", tgwPath.Source)
-		// fmt.Println("Destination ", tgwPath.Destination)
-		// fmt.Println("TransitGatewayID ", tgwPath.TransitGatewayID)
-		// fmt.Println("Path ", tgwPath.Path[0].Name)
-		// fmt.Println("Path ", tgwPath.Path[1].Name)
+
+		// Create a new path
+		tgwPath := awsrouter.AttPath{}
+		tgwPath.Tgw = tgw
+		tgwPath.Walk(srcIPAddress, dstIPAddress)
+		for i := 0 ; i < len(tgwPath.Path) ; i++ {
+			fmt.Println("Path:", tgwPath.Path[i].ID)
+		}
 	},
 }
 

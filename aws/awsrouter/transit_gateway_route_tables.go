@@ -86,8 +86,8 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 // Update the attachments of a TgwRouteTable.
 func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, api AwsRouter) error {
 	// get the attachments for the route table
-	input := TgwAttachmentsInputFilter(t.ID)
-	attachments, err := GetAttachments(ctx, api, input)
+	input := TgwRouteTableAssociationInputFilter(t.ID)
+	attachments, err := GetTgwRouteTableAssociations(ctx, api, input)
 	if err != nil {
 		return err
 	}
