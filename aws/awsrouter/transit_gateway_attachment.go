@@ -69,6 +69,17 @@ type AttPath struct {
 	Tgw           *Tgw
 }
 
+// NewAttPath builds a AttPath from a aws TransitGatewayRoute type.
+func NewAttPath() *AttPath {
+	return &AttPath{
+		Path:          make([]*TgwAttachment, 0),
+		MapPath:       make(map[string]struct{}),
+		SrcRouteTable: TgwRouteTable{},
+		DstRouteTable: TgwRouteTable{},
+		Tgw:           &Tgw{},
+	}
+}
+
 // isAttachmentInPath returns true if the attachment is in the path.
 func (attPath AttPath) isAttachmentInPath(ID string) bool {
 	_, ok := attPath.MapPath[ID]
@@ -82,8 +93,6 @@ func (attPath AttPath) isAttachmentInPath(ID string) bool {
 // The attachment is added only if it is not already in the path.
 // If the attachment is already in the path it will throw an error.
 func (attPath *AttPath) addAttachmentToPath(att *TgwAttachment) error {
-	mapPath := make(map[string]struct{})
-	attPath.MapPath = mapPath
 	if attPath.isAttachmentInPath(att.ID) {
 		return ErrTgwAttachmetInPath
 	}
