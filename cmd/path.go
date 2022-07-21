@@ -61,31 +61,19 @@ to quickly create a Cobra application.`,
 		}
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
-		tgwInputFilter := awsrouter.TgwInputFilter([]string{"tgw-05ab7c84b875cfdec"})
-		tgwOutput, err := awsrouter.GetTgw(context.TODO(), client, tgwInputFilter)
-		tgw := awsrouter.NewTgw(tgwOutput.TransitGateways[0])
-		fmt.Println("tgw:", tgw.ID)
-		tgw.UpdateRouteTables(context.TODO(), client)
-		tgw.UpdateTgwRoutes(context.TODO(), client)
-		// Update the attachments
-		tgw.UpdateTgwRouteTablesAttachments(context.TODO(), client)
-		// fmt.Println("RT Name Attach:", tgw.RouteTables[0].Name)
-		// fmt.Println("RT Attach:", tgw.RouteTables[0].Attachments)
-
-		// // Get the directly connected attachment for the source and destination IP address
-		// srcRt, srcAtts, err := tgw.GetDirectlyConnectedAttachment(srcIPAddress)
-		// dstRt, dstAtts, err := tgw.GetDirectlyConnectedAttachment(dstIPAddress)
-
-		// fmt.Println("srcRt:", srcRt.Name)
-		// fmt.Println("dstRt:", dstRt.Name)
-		// fmt.Println("srcAtts:", srcAtts[0].ID)
-		// fmt.Println("dstAtts:", dstAtts[0].ID)
-
-		// Create a new path
-		tgwPath := awsrouter.NewAttPath()
-		tgwPath.Tgw = tgw
-		tgwPath.Walk(context.TODO(), client, srcIPAddress, dstIPAddress)
-		fmt.Println("Path:", tgwPath.String())
+		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
+		for _, tgw := range tgws {
+			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
+			if len(tgw.RouteTables) > 0 {
+				tgw.UpdateTgwRouteTablesAttachments(context.TODO(), client)
+				tgwPath := awsrouter.NewAttPath()
+				tgwPath.Tgw = tgw
+				tgwPath.Walk(context.TODO(), client, srcIPAddress, dstIPAddress)
+				fmt.Println("Path:", tgwPath.String())
+			} else {
+				fmt.Println("No Route Tables found")
+			}
+		}
 	},
 }
 

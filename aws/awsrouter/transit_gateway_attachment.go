@@ -170,8 +170,11 @@ func (attPath *AttPath) Walk(ctx context.Context, api AwsRouter, src, dst net.IP
 // String for a AttPath returns a string with the path.
 func (attPath AttPath) String() string {
 	var result string
-	for _, att := range attPath.Path {
-		result += fmt.Sprintf("%s\n", att.ID)
+	for i := 0; i < len(attPath.Path); i++ {
+		result += attPath.Path[i].ID + " "
+		if i < len(attPath.Path)-1 {
+			result += "-> "
+		}
 	}
 	return result
 }
