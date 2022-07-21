@@ -127,7 +127,7 @@ func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRoute
 		}
 		switch r.Type {
 		case types.TransitGatewayRouteTypePropagated:
-			srcAttachment = GetAttachmentsFromTgwRoute(r)[0]
+			srcAttachment = getAttachmentsFromTgwRoute(r)[0]
 			break
 		case types.TransitGatewayRouteTypeStatic:
 			fmt.Println("Not implemented")

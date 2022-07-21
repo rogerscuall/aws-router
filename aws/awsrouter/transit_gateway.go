@@ -142,79 +142,6 @@ func (t *Tgw) GetTgwRouteTableByID(id string) (*TgwRouteTable, error) {
 	return nil, fmt.Errorf("route table %s not found", id)
 }
 
-// GetTgwPath returns the best path TgwPath for two endpoints.
-//
-// func (t *Tgw) GetTgwPath(src, dest net.IP) (*TgwPath, error) {
-
-// 	// find the best route prefix for source and destination
-// 	var srcPrefix, destPrefix net.IPNet
-// 	w := sync.WaitGroup{}
-// 	w.Add(2)
-// 	go func() {
-// 		defer w.Done()
-// 		srcPrefix, _ = findBestRoutePrefix(t.RouteTables, src)
-// 	}()
-// 	go func() {
-// 		defer w.Done()
-// 		destPrefix, _ = findBestRoutePrefix(t.RouteTables, dest)
-// 	}()
-// 	w.Wait()
-
-// 	// find the route tables that have route to the prefixes
-// 	srcTgwRt, _ := FilterRouteTableRoutesPerPrefix(t.RouteTables, srcPrefix)
-// 	destTgwRt, _ := FilterRouteTableRoutesPerPrefix(t.RouteTables, destPrefix)
-
-// 	// find the attachment that is directly connected to the prefixes
-// 	srcAtt := GetDirectlyConnectedAttachmentFromTgwRoute(srcTgwRt)
-// 	destAtt := GetDirectlyConnectedAttachmentFromTgwRoute(destTgwRt)
-// 	fmt.Println("srcAtt", srcAtt[0].ResourceID)
-// 	fmt.Println("destAtt", destAtt[0].ResourceID)
-
-// 	// get the route table of the attachment.
-// 	filter := []types.Filter{
-// 		{
-// 			Name:   aws.String("transit-gateway-attachment-id"),
-// 			Values: []string{srcAtt[0].ID, destAtt[0].ID},
-// 		},
-// 	}
-// 	cfg, err := config.LoadDefaultConfig(context.TODO())
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error loading config: %w", err)
-// 	}
-
-// 	arrayPath := make([]TgwRouteTable, 2)
-// 	path := TgwPath{
-// 		Source:           *srcAtt[0],
-// 		Destination:      *destAtt[0],
-// 		TransitGatewayID: t.ID,
-// 		Path:             arrayPath,
-// 	}
-
-// 	client := ec2.NewFromConfig(cfg)
-// 	for _, tgwRt := range t.RouteTables {
-// 		input := &ec2.GetTransitGatewayRouteTableAssociationsInput{
-// 			TransitGatewayRouteTableId: aws.String(tgwRt.ID),
-// 			Filters:                    filter,
-// 		}
-// 		result, err := client.GetTransitGatewayRouteTableAssociations(context.TODO(), input)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("error retrieving Transit Gateway Route Table Associations: %w", err)
-// 		}
-// 		if len(result.Associations) > 0 {
-// 			for _, assoc := range result.Associations {
-// 				if *assoc.ResourceId == srcAtt[0].ResourceID {
-// 					path.Path[0] = *tgwRt
-// 				}
-// 				if *assoc.ResourceId == destAtt[0].ResourceID {
-// 					path.Path[1] = *tgwRt
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return &path, nil
-
-// }
-
 // GetDirectlyConnectedAttachment returns the route and attachment that is directly connected to the ipAddress.
 // In the case of ECMP we can have more than one attachment per route.
 // In the majority of the cases we will have only one attachment per route.
@@ -233,7 +160,7 @@ func (t *Tgw) GetDirectlyConnectedAttachment(ipAddress net.IP) (TgwRouteTable, [
 		return rt, attachment, fmt.Errorf("error finding the route table: %w", err)
 	}
 	// find the attachment that is directly connected to the prefix
-	attachment = GetDirectlyConnectedAttachmentFromTgwRoute(listRouteTable)
+	attachment = getDirectlyConnectedAttachmentFromTgwRoute(listRouteTable)
 	if len(attachment) == 0 {
 		return rt, attachment, fmt.Errorf("error finding the attachment: %w", err)
 	}

@@ -69,17 +69,17 @@ to quickly create a Cobra application.`,
 		tgw.UpdateTgwRoutes(context.TODO(), client)
 		// Update the attachments
 		tgw.UpdateTgwRouteTablesAttachments(context.TODO(), client)
-		fmt.Println("RT Name Attach:", tgw.RouteTables[0].Name)
-		fmt.Println("RT Attach:", tgw.RouteTables[0].Attachments)
+		// fmt.Println("RT Name Attach:", tgw.RouteTables[0].Name)
+		// fmt.Println("RT Attach:", tgw.RouteTables[0].Attachments)
 
-		// Get the directly connected attachment for the source and destination IP address
-		srcRt, srcAtts, err := tgw.GetDirectlyConnectedAttachment(srcIPAddress)
-		dstRt, dstAtts, err := tgw.GetDirectlyConnectedAttachment(dstIPAddress)
+		// // Get the directly connected attachment for the source and destination IP address
+		// srcRt, srcAtts, err := tgw.GetDirectlyConnectedAttachment(srcIPAddress)
+		// dstRt, dstAtts, err := tgw.GetDirectlyConnectedAttachment(dstIPAddress)
 
-		fmt.Println("srcRt:", srcRt.Name)
-		fmt.Println("dstRt:", dstRt.Name)
-		fmt.Println("srcAtts:", srcAtts[0].ID)
-		fmt.Println("dstAtts:", dstAtts[0].ID)
+		// fmt.Println("srcRt:", srcRt.Name)
+		// fmt.Println("dstRt:", dstRt.Name)
+		// fmt.Println("srcAtts:", srcAtts[0].ID)
+		// fmt.Println("dstAtts:", dstAtts[0].ID)
 
 		// Create a new path
 		tgwPath := awsrouter.AttPath{}
