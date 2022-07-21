@@ -154,7 +154,7 @@ func TestAttPath_addAttachmentToPath(t *testing.T) {
 				MapPath: tt.fields.MapPath,
 			}
 			if err := attPath.addAttachmentToPath(tt.args.att); (err != nil) != tt.wantErr {
-				t.Errorf("AttPath.AddAttachmentToPath() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("AttPath.addAttachmentToPath() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
