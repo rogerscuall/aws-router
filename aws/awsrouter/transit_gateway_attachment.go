@@ -1,10 +1,12 @@
 package awsrouter
 
 import (
+	"context"
 	"fmt"
 	"net"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 // TgwAttachments holds the data of a Transit Gateway Attachment.
@@ -60,12 +62,13 @@ type AttPath struct {
 	Path          []*TgwAttachment
 	SrcRouteTable TgwRouteTable
 	DstRouteTable TgwRouteTable
-	Tgw 		 *Tgw
+	Tgw           *Tgw
 }
 
 // Walk will do a packet walk from the src to dst and updates the field Path.
 // The function needs a attPath that has at least the source attachment.
-func (attPath *AttPath) Walk(src, dst net.IP) error {
+// TODO: allow the option to increase the depth of the walk, right now is 10.
+func (attPath *AttPath) Walk(ctx context.Context, api AwsRouter, src, dst net.IP) error {
 	srcRt, srcAtts, err := attPath.Tgw.GetDirectlyConnectedAttachment(src)
 	if err != nil {
 		return err
@@ -77,7 +80,7 @@ func (attPath *AttPath) Walk(src, dst net.IP) error {
 	attPath.Path = append(attPath.Path, srcAtts[0])
 	attPath.SrcRouteTable = srcRt
 	attPath.DstRouteTable = dstRt
-	tgwRt := srcRt
+	tgwRt := &srcRt
 	for i := 0; i < 10; i++ {
 		route, err := tgwRt.BestRouteToIP(dst)
 		if err != nil {
@@ -92,6 +95,38 @@ func (attPath *AttPath) Walk(src, dst net.IP) error {
 			// We reach the destination attachment
 			break
 		}
+		// Find the route table associated to the attachment
+		// Create a filter for TgwAttachmentInputFilter
+		filter := types.Filter{
+			Name:   aws.String("resource-id"),
+			Values: []string{att.ResourceID},
+		}
+		// Create a filter of type TgwAttachmentInputFilter
+		input := TgwAttachmentInputFilter(filter)
+		// Get the list of TgwRouteTable that match the filter
+		output, err := TgwGetAttachments(ctx, api, input)
+		if err != nil {
+			return err
+		}
+		if len(output.TransitGatewayAttachments) != 1 {
+			return fmt.Errorf("No route table found for attachment %s", att.ID)
+		}
+		routeTableID := *output.TransitGatewayAttachments[0].Association.TransitGatewayRouteTableId
+		if routeTableID == attPath.DstRouteTable.ID {
+			// We reach the destination attachment
+			break
+		}
+		tgwRt, err = attPath.Tgw.GetTgwRouteTableByID(routeTableID)
 	}
 	return nil
+}
+
+
+// String for a AttPath returns a string with the path.
+func (attPath AttPath) String() string {
+	var result string
+	for _, att := range attPath.Path {
+		result += fmt.Sprintf("%s\n", att.ID)
+	}
+	return result
 }

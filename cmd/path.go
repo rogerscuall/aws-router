@@ -84,10 +84,8 @@ to quickly create a Cobra application.`,
 		// Create a new path
 		tgwPath := awsrouter.AttPath{}
 		tgwPath.Tgw = tgw
-		tgwPath.Walk(srcIPAddress, dstIPAddress)
-		for i := 0 ; i < len(tgwPath.Path) ; i++ {
-			fmt.Println("Path:", tgwPath.Path[i].ID)
-		}
+		tgwPath.Walk(context.TODO(), client, srcIPAddress, dstIPAddress)
+		fmt.Println("Path:", tgwPath.String())
 	},
 }
 

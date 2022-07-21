@@ -133,6 +133,15 @@ func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 	return tgws, nil
 }
 
+func (t *Tgw) GetTgwRouteTableByID(id string) (*TgwRouteTable, error) {
+	for _, tgwRouteTable := range t.RouteTables {
+		if tgwRouteTable.ID == id {
+			return tgwRouteTable, nil
+		}
+	}
+	return nil, fmt.Errorf("route table %s not found", id)
+}
+
 // GetTgwPath returns the best path TgwPath for two endpoints.
 //
 // func (t *Tgw) GetTgwPath(src, dest net.IP) (*TgwPath, error) {
