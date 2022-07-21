@@ -171,9 +171,9 @@ func (attPath *AttPath) Walk(ctx context.Context, api AwsRouter, src, dst net.IP
 func (attPath AttPath) String() string {
 	var result string
 	for i := 0; i < len(attPath.Path); i++ {
-		result += attPath.Path[i].ID + " "
+		result += attPath.Path[i].ID
 		if i < len(attPath.Path)-1 {
-			result += "-> "
+			result += " -> "
 		}
 	}
 	return result

@@ -202,25 +202,38 @@ func TestAttPath_String(t *testing.T) {
 	type fields struct {
 		Path          []*TgwAttachment
 		MapPath       map[string]struct{}
-		SrcRouteTable TgwRouteTable
-		DstRouteTable TgwRouteTable
-		Tgw           *Tgw
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   string
 	}{
-		// TODO: Add test cases.
+		{
+			name: "SingleHop",
+			fields: fields{
+				Path: []*TgwAttachment{
+					{ID: "1234"},
+				},
+		},
+			want: "1234",
+	},
+	{
+		name: "MultiHop",
+		fields: fields{
+			Path: []*TgwAttachment{
+				{ID: "1234"},
+				{ID: "5678"},
+			},
+		},
+		want: "1234 -> 5678",
+	},
+
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := AttPath{
 				Path:          tt.fields.Path,
 				MapPath:       tt.fields.MapPath,
-				SrcRouteTable: tt.fields.SrcRouteTable,
-				DstRouteTable: tt.fields.DstRouteTable,
-				Tgw:           tt.fields.Tgw,
 			}
 			if got := attPath.String(); got != tt.want {
 				t.Errorf("AttPath.String() = %v, want %v", got, tt.want)
