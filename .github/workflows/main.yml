@@ -7,7 +7,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-
+  test:
+    - name: Unit Tests
+      uses: golang:1.18.2-buster
+      run: go test -cover -v ./...
+      
   build:
     runs-on: ubuntu-latest
     steps:
@@ -22,6 +26,7 @@ jobs:
       run: go install github.com/go-task/task/v3/cmd/task@latest
 
     - name: Test
+      uses: golang:1.18.2-buster
       run: go test -v ./...
     
     - name: Build
