@@ -10,8 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: golang:1.18.2-buster
-    env:
-      - AWS_REGION=us-east-1
+    env: AWS_REGION=us-east-1
     steps:
       - name: Checkout Project
         uses: actions/checkout@v1
