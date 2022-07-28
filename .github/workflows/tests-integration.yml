@@ -22,7 +22,8 @@ jobs:
       - name: Change permissions
         run: chmod +x awsrouters
       - name: Run the binary
-        env: AWS_REGION=us-east-1
+        env:
+          AWS_REGION: us-east-1
         run: ./awsrouters path 10.0.1.1 10.0.2.1
 
   # build:
