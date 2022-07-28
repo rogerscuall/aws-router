@@ -8,10 +8,11 @@ on:
 
 jobs:
   test:
+    runs-on: ubuntu-latest
+    container: golang:1.18.2-buster
     - name: Unit Tests
-      uses: golang:1.18.2-buster
       run: go test -cover -v ./...
-      
+
   build:
     runs-on: ubuntu-latest
     steps:
