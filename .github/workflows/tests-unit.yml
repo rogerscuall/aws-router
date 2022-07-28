@@ -1,0 +1,41 @@
+name: UnitTests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.18.2-buster
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v1
+      - name: Path info
+        run: pwd
+      - name: Files info
+        run: ls -la
+      - name: Unit Tests
+        run: go test -cover -v ./...
+
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v3
+  #       with:
+  #         go-version: 1.18
+
+  #     - name: Set up task
+  #       run: go install github.com/go-task/task/v3/cmd/task@latest
+
+  #     - name: Test
+  #       uses: golang:1.18.2-buster
+  #       run: go test -v ./...
+
+  #     - name: Build
+  #       run: task buildall

@@ -1,4 +1,4 @@
-name: Go
+name: IntegrationTest
 
 on:
   push:
@@ -17,8 +17,12 @@ jobs:
         run: pwd
       - name: Files info
         run: ls -la
-      - name: Unit Tests
-        run: go test -cover -v ./...
+      - name: Build for the current platform
+        run: go build -o awsrouters *.go
+      - name: Change permissions
+        run: chmod +x awsrouters
+      - name: Run the binary
+        run: ./awsrouters path 10.0.1.1 10.0.2.1
 
   # build:
   #   runs-on: ubuntu-latest
