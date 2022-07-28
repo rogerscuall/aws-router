@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.18.2-buster
     steps:
+      - name: Checkout Project
+        uses: actions/checkout@v1
       - name: Path info
         run: pwd
       - name: Files info
