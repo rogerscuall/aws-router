@@ -13,6 +13,9 @@ tasks:
   build:
     cmds:
       - GOOS=darwin go build -o awsrouters *.go
+  buildMacIntel:
+    cmds:
+      - GOOS=darwin GOARCH=amd64 go build -o awsrouters-intel *.go
   buildwindows:
     cmds:
       - GOOS=windows GOARCH=amd64 go build -o awsrouters.exe *.go
@@ -26,7 +29,7 @@ tasks:
   docs:
     cmds:
       - echo "Open the browser and navigate to http://localhost:6060/docs"
-      - echo "To get all methods, fields and types regardeless if they are exported or not, use '?m=all' at the end of the URL"
+      - echo "To get all methods, fields and types regardless if they are exported or not, use '?m=all' at the end of the URL"
       - godoc -http=:6060
   cleanexports:
     cmds:
