@@ -54,7 +54,6 @@ var rootCmd = &cobra.Command{
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		client := ec2.NewFromConfig(cfg)
 		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
-
 		for _, tgw := range tgws {
 			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
 			if len(tgw.RouteTables) > 0 {

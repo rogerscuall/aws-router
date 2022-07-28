@@ -268,6 +268,10 @@ func (t TgwDescriberImpl) GetTransitGatewayRouteTableAssociations(ctx context.Co
 	return listGetTransitGatewayRouteTableAssociationsOutput, nil
 }
 
+func (t TgwDescriberImpl) DescribeTransitGatewayAttachments(ctx context.Context, params *ec2.DescribeTransitGatewayAttachmentsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTransitGatewayAttachmentsOutput, error) {
+	return nil, nil
+}
+
 func TestGetTgw(t *testing.T) {
 	type args struct {
 		ctx   context.Context
