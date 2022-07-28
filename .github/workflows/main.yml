@@ -12,9 +12,9 @@ jobs:
     container: golang:1.18.2-buster
     steps:
       - name: Path info
-        run: | 
-        pwd
-        ls -la
+        run: pwd
+      - name: Files info
+        run: ls -la
       - name: Unit Tests
         run: go test -cover -v ./...
 
