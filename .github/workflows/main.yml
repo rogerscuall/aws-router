@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.18.2-buster
     steps:
+      - name: Path info
+        run: | 
+        pwd
+        ls -la
       - name: Unit Tests
         run: go test -cover -v ./...
 
