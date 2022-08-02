@@ -24,6 +24,7 @@ unittest:
 integrationtest:
   stage: tests
   script:
+    - env 
     - go install gitlab.presidio.com/rgomez/aws-router
     - mkdir csv
     - aws-router
