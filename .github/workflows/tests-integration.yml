@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    #container: golang:1.18.2-buster
+    container: golang:1.18.2-buster
     steps:
       - name: Checkout Project
         uses: actions/checkout@v1
