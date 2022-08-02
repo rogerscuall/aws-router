@@ -20,16 +20,16 @@ func GetClient() (client *ec2.Client, err error) {
 
 	client = ec2.NewFromConfig(cfg)
 
-	stsClient := sts.NewFromConfig(cfg)
-	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
-	if err != nil {
-		appCreds := aws.NewCredentialsCache(ec2rolecreds.New())
-		value, err := appCreds.Retrieve(context.TODO())
-		if err != nil {
-			return nil, ErrNoEC2ProfileRole
-		}
-		log.Printf("[INFO] Using EC2 Profile Role: %s", value.AccessKeyID)
-	}
-	log.Printf("Account: %s, Arn: %s", aws.ToString(identity.Account), aws.ToString(identity.Arn))
+	// stsClient := sts.NewFromConfig(cfg)
+	// identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	// if err != nil {
+	// 	appCreds := aws.NewCredentialsCache(ec2rolecreds.New())
+	// 	value, err := appCreds.Retrieve(context.TODO())
+	// 	if err != nil {
+	// 		return nil, ErrNoEC2ProfileRole
+	// 	}
+	// 	log.Printf("[INFO] Using EC2 Profile Role: %s", value.AccessKeyID)
+	// }
+	// log.Printf("Account: %s, Arn: %s", aws.ToString(identity.Account), aws.ToString(identity.Arn))
 	return client, nil
 }
