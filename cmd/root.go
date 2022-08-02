@@ -51,6 +51,7 @@ var rootCmd = &cobra.Command{
 			}
 		}()
 		fmt.Println("Downloading Routing Information...")
+		// Get the AWS credentials from the environment
 		client, err := auth.GetClient()
 
 		if err != nil {
