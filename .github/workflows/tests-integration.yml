@@ -23,6 +23,8 @@ jobs:
         run: chmod +x awsrouters
       - name: Running the default
         run: ./awsrouters
+        env:
+          AWS_REGION: us-east-1
       # - name: Testing creds
       #   run: aws s3 ls
       - name: Run the binary
