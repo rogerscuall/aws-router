@@ -24,12 +24,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
+	"gitlab.presidio.com/rgomez/aws-router/aws/auth"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -51,8 +51,12 @@ var rootCmd = &cobra.Command{
 			}
 		}()
 		fmt.Println("Downloading Routing Information...")
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		client := ec2.NewFromConfig(cfg)
+		client, err := auth.GetClient()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
 		for _, tgw := range tgws {
 			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
