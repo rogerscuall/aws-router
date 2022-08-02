@@ -46,7 +46,7 @@ var syncCmd = &cobra.Command{
 				cobra.CheckErr(err)
 			}
 		}()
-		dbNamePrefix = viper.GetString("db_name")
+		dbNamePrefix := viper.GetString("db_name")
 		dbNameTgw := fmt.Sprintf("%s_tgw", dbNamePrefix)
 		dbNameTgwRouteTable := fmt.Sprintf("%s_tgw_route_table", dbNamePrefix)
 		var dbAdapterTgw, dbAdapterTgwRouteTable ports.DbPort
