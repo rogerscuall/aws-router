@@ -35,11 +35,11 @@ jobs:
         run: |
           touch .go-aws-routing.yaml
           echo "db_Name: testing-db123" > .go-aws-routing.yaml
-          aws-router sync
+          ./awsrouters sync
       - name: Running a path sync command 
         env:
           AWS_REGION: us-east-1
-        run: aws-router path 10.0.1.1 10.0.2.1
+        run: ./awsrouters path 10.0.1.1 10.0.2.1
 
   # build:
   #   runs-on: ubuntu-latest
