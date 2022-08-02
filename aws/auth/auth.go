@@ -20,7 +20,7 @@ func GetClient() (client *ec2.Client, err error) {
 	stsClient := sts.NewFromConfig(cfg)
 	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
-		return nil, ErrStsIdentityNotFound
+		return nil, ErrSTSIdentityNotFound
 	}
 	log.Printf("Account: %s, Arn: %s", aws.ToString(identity.Account), aws.ToString(identity.Arn))
 	client = ec2.NewFromConfig(cfg)
