@@ -26,8 +26,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 )
@@ -43,32 +41,29 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.TODO()
+
 		fmt.Println("path called")
 		fmt.Println("args:", args)
-		var err error
-		defer func() {
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-		}()
 		srcIPAddress := net.ParseIP(args[0])
 		if srcIPAddress == nil {
-			cobra.CheckErr(fmt.Errorf("invalid source IP address: %s", args[0]))
+			app.ErrorLog.Println("invalid source IP address:", args[0])
 		}
 		dstIPAddress := net.ParseIP(args[1])
 		if dstIPAddress == nil {
-			cobra.CheckErr(fmt.Errorf("invalid destination IP address: %s", args[0]))
+			app.ErrorLog.Println("invalid destination IP address:", args[1])
 		}
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		client := ec2.NewFromConfig(cfg)
-		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
+		tgws, err := app.UpdateRouting(ctx)
+		if err != nil {
+			app.ErrorLog.Println("error updating routing:", err)
+		}
 		for _, tgw := range tgws {
 			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
 			if len(tgw.RouteTables) > 0 {
-				tgw.UpdateTgwRouteTablesAttachments(context.TODO(), client)
+				tgw.UpdateTgwRouteTablesAttachments(context.TODO(), app.RouterClient)
 				tgwPath := awsrouter.NewAttPath()
 				tgwPath.Tgw = tgw
-				tgwPath.Walk(context.TODO(), client, srcIPAddress, dstIPAddress)
+				tgwPath.Walk(context.TODO(), app.RouterClient, srcIPAddress, dstIPAddress)
 				fmt.Println("Path:", tgwPath.String())
 			} else {
 				fmt.Println("No Route Tables found")

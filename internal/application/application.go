@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -10,12 +11,18 @@ import (
 	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
+// Application type is used across the application to de dependency injection.
 type Application struct {
 	RouterClient ports.AWSRouter
+	InfoLog      *log.Logger
+	ErrorLog     *log.Logger
 }
 
 func NewApplication() *Application {
-	return &Application{}
+	return &Application{
+		InfoLog: log.New(nil, "INFO: ", log.Ldate|log.Ltime),
+		ErrorLog: log.New(nil, "ERROR: ", log.Ldate|log.Ltime),
+	}
 }
 
 // Init will load the credentials into the application. If no credentials are found then an error will be returned.

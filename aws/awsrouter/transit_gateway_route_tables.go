@@ -7,9 +7,9 @@ import (
 	"net"
 
 	"github.com/alexeyco/simpletable"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/fatih/color"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
@@ -19,7 +19,7 @@ type TgwRouteTable struct {
 	Name        string
 	Data        types.TransitGatewayRouteTable
 	Routes      []types.TransitGatewayRoute
-	Attachments []TgwAttachment
+	Attachments []*TgwAttachment
 }
 
 // Bytes returns the JSON representation of the TgwRouteTable as a slice of bytes.
@@ -85,20 +85,15 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 }
 
 // Update the attachments of a TgwRouteTable.
-func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, api ports.AWSRouter) error {
+func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, attachments *ec2.GetTransitGatewayRouteTableAssociationsOutput) error {
 	// get the attachments for the route table
-	input := ports.TgwRouteTableAssociationInputFilter(t.ID)
-	attachments, err := ports.GetTgwRouteTableAssociations(ctx, api, input)
-	if err != nil {
-		return err
-	}
 	if len(attachments.Associations) < 1 {
-		t.Attachments = []TgwAttachment{}
+		t.Attachments = []*TgwAttachment{}
 		return nil
 	}
 	for _, a := range attachments.Associations {
 		attType := fmt.Sprint(a.ResourceType)
-		newAttachment := TgwAttachment{
+		newAttachment := &TgwAttachment{
 			ID:         *a.TransitGatewayAttachmentId,
 			ResourceID: *a.ResourceId,
 			Type:       attType,

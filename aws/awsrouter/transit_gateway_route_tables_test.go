@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 var listOfRouteTables = []*TgwRouteTable{
@@ -346,11 +346,11 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 		Name        string
 		Data        types.TransitGatewayRouteTable
 		Routes      []types.TransitGatewayRoute
-		Attachments []TgwAttachment
+		Attachments []*TgwAttachment
 	}
 	type args struct {
 		ctx context.Context
-		api ports.AWSRouter
+		api *ec2.GetTransitGatewayRouteTableAssociationsOutput
 	}
 	tests := []struct {
 		name    string
@@ -379,7 +379,14 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 			},
 			args: args{
 				context.TODO(),
-				TgwDescriberImpl{},
+				&ec2.GetTransitGatewayRouteTableAssociationsOutput{
+					Associations: []types.TransitGatewayRouteTableAssociation{
+						{
+							ResourceId: aws.String("tgw-0d7f9b0x"),
+							ResourceType:               "vpc",
+							TransitGatewayAttachmentId: aws.String("tgw-attach-0d7f9b0x")},
+					},
+				},
 			},
 			wantErr: false,
 		},

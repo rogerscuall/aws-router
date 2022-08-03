@@ -28,6 +28,7 @@ func newTgwAttachment(att types.TransitGatewayRouteAttachment) *TgwAttachment {
 }
 
 // getAttachmentsFromTgwRoute returns a list of TgwAttachments from a aws TransitGatewayRoute type.
+// This is a helper function that takes in a routes (AWS type) and returns a list of TgwAttachments.
 func getAttachmentsFromTgwRoute(route types.TransitGatewayRoute) []*TgwAttachment {
 	if len(route.TransitGatewayAttachments) == 0 {
 		return nil

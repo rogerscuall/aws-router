@@ -26,8 +26,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 )
@@ -39,15 +37,14 @@ var excelCmd = &cobra.Command{
 	Long:  `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
+		ctx := context.TODO()
 		defer func() {
 			if err != nil {
-				cobra.CheckErr(err)
+				app.ErrorLog.Println(err)
 			}
 		}()
 		fmt.Println("Exporting AWS routing to Excel")
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		client := ec2.NewFromConfig(cfg)
-		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
+		tgws, err := app.UpdateRouting(ctx)
 		folder, err := os.Stat("excel")
 		err = awsrouter.ExportTgwRoutesExcel(tgws, folder)
 		if err != nil {

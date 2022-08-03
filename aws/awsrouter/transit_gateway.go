@@ -90,7 +90,12 @@ func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api ports.AWSRouter) error {
 // UpdateTgwRouteTablesAttachments updates the Attachments of a TgwRouteTable.
 func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWSRouter) error {
 	for _, tgwRouteTable := range t.RouteTables {
-		err := tgwRouteTable.UpdateAttachments(ctx, api)
+		input := ports.TgwRouteTableAssociationInputFilter(tgwRouteTable.ID)
+		result, err := ports.GetTgwRouteTableAssociations(ctx, api, input)
+		if err != nil {
+			return fmt.Errorf("error retrieving Transit Gateway Route Table Associations: %w", err)
+		}
+		err = tgwRouteTable.UpdateAttachments(ctx, result)
 		if err != nil {
 			return fmt.Errorf("error updating the route table %s %w", tgwRouteTable.ID, err)
 		}

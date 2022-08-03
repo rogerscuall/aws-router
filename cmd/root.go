@@ -24,7 +24,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"gitlab.presidio.com/rgomez/aws-router/internal/application"
@@ -47,7 +46,7 @@ var rootCmd = &cobra.Command{
 		ctx := context.TODO()
 		tgws, err := app.UpdateRouting(ctx)
 		if err != nil {
-			log.Fatal(err)
+			app.ErrorLog.Println(err)
 		}
 		for _, tgw := range tgws {
 			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
@@ -87,9 +86,8 @@ func init() {
 	app = application.NewApplication()
 	err := app.Init()
 	if err != nil {
-		log.Fatal(err)
+		app.ErrorLog.Println(err)
 	}
-
 }
 
 // initConfig reads in config file and ENV variables if set.
