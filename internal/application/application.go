@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"github.com/rogerscuall/aws-router/aws/awsrouter"
+	"github.com/rogerscuall/aws-router/ports"
 )
 
 // Application type is used across the application to de dependency injection.
@@ -20,7 +20,7 @@ type Application struct {
 
 func NewApplication() *Application {
 	return &Application{
-		InfoLog: log.New(nil, "INFO: ", log.Ldate|log.Ltime),
+		InfoLog:  log.New(nil, "INFO: ", log.Ldate|log.Ltime),
 		ErrorLog: log.New(nil, "ERROR: ", log.Ldate|log.Ltime),
 	}
 }

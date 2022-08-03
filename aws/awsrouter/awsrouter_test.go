@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/google/go-cmp/cmp"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"github.com/rogerscuall/aws-router/ports"
 )
 
 type TgwDescriberImpl struct{}

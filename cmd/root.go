@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.presidio.com/rgomez/aws-router/internal/application"
+	"github.com/rogerscuall/aws-router/internal/application"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

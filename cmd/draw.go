@@ -28,9 +28,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/rogerscuall/aws-router/aws/awsrouter"
+	"github.com/rogerscuall/aws-router/aws/draw"
 	"github.com/spf13/cobra"
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
-	"gitlab.presidio.com/rgomez/aws-router/aws/draw"
 )
 
 // drawCmd represents the draw command

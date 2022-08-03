@@ -7,7 +7,6 @@ stages:
   - tests
   - build
 
-
 variables:
   PACKAGE_VERSION: "0.1.0"
   DARWIN_AMD64_BINARY: "awsrouters"
@@ -24,8 +23,8 @@ unittest:
 integrationtest:
   stage: tests
   script:
-    - env 
-    - go install gitlab.presidio.com/rgomez/aws-router
+    - env
+    - go install github.com/rogerscuall/aws-router
     - mkdir csv
     - aws-router
     - mkdir excel
@@ -37,7 +36,7 @@ integrationtest:
   tags:
     - aws
   artifacts:
-    paths: 
+    paths:
       - csv
       - excel
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"github.com/rogerscuall/aws-router/ports"
 )
 
 //Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.

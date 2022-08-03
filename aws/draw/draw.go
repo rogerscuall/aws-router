@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"io/fs"
 
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
+	"github.com/rogerscuall/aws-router/aws/awsrouter"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 

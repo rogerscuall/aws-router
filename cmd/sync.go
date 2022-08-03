@@ -25,10 +25,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rogerscuall/aws-router/adapters/db"
+	"github.com/rogerscuall/aws-router/ports"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.presidio.com/rgomez/aws-router/adapters/db"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 // syncCmd represents the sync command

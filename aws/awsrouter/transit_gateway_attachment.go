@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"github.com/rogerscuall/aws-router/ports"
 )
 
 // TgwAttachments holds the data of a Transit Gateway Attachment.

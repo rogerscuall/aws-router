@@ -26,8 +26,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rogerscuall/aws-router/aws/awsrouter"
 	"github.com/spf13/cobra"
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 )
 
 // excelCmd represents the excel command

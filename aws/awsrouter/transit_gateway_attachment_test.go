@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"gitlab.presidio.com/rgomez/aws-router/ports"
+	"github.com/rogerscuall/aws-router/ports"
 )
 
 func Test_newTgwAttachment(t *testing.T) {

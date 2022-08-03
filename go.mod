@@ -1,21 +1,21 @@
-module gitlab.presidio.com/rgomez/aws-router
+module github.com/rogerscuall/aws-router
 
 go 1.18
 
 require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/alexeyco/simpletable v1.0.0
-	github.com/aws/aws-sdk-go v1.44.19
-	github.com/aws/aws-sdk-go-v2/config v1.15.7
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.43.1
+	github.com/aws/aws-sdk-go v1.44.69
+	github.com/aws/aws-sdk-go-v2/config v1.15.15
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.51.1
 	github.com/charmbracelet/charm v0.12.1
 	github.com/fatih/color v1.13.0
 	github.com/fogleman/gg v1.3.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.5.8
-	github.com/spf13/cobra v1.4.0
-	github.com/spf13/viper v1.11.0
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	github.com/spf13/cobra v1.5.0
+	github.com/spf13/viper v1.12.0
+	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539
 )
 
 require (
@@ -25,7 +25,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.9 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.15 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.9 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.12 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.16 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.10 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/subosito/gotenv v1.3.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
+	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
