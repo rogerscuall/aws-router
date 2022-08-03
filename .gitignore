@@ -91,6 +91,7 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,go
 .vscode/launch.json
 awsrouters
+awsrouter
 awsrouters.exe
 csv
 excel

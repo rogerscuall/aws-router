@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
+	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 var listOfRouteTables = []*TgwRouteTable{
@@ -349,7 +350,7 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 	}
 	type args struct {
 		ctx context.Context
-		api AwsRouter
+		api ports.AWSRouter
 	}
 	tests := []struct {
 		name    string

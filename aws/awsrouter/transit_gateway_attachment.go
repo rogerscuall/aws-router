@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
+	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 // TgwAttachments holds the data of a Transit Gateway Attachment.
@@ -105,7 +106,7 @@ func (attPath *AttPath) addAttachmentToPath(att *TgwAttachment) error {
 // The function will walk from one attachment to the next, until it reaches the dst.
 // There is a limit of 10 hops. If the limit is reached, the function will return an error.
 // TODO: allow the option to increase the depth of the walk, right now is 10.
-func (attPath *AttPath) Walk(ctx context.Context, api AwsRouter, src, dst net.IP) error {
+func (attPath *AttPath) Walk(ctx context.Context, api ports.AWSRouter, src, dst net.IP) error {
 	srcRt, srcAtts, err := attPath.Tgw.GetDirectlyConnectedAttachment(src)
 	if err != nil {
 		return err
@@ -147,9 +148,9 @@ func (attPath *AttPath) Walk(ctx context.Context, api AwsRouter, src, dst net.IP
 			Values: []string{nextHopAtt.ResourceID},
 		}
 		// Create a filter of type TgwAttachmentInputFilter
-		input := TgwAttachmentInputFilter(filter)
+		input := ports.TgwAttachmentInputFilter(filter)
 		// Get the list of TgwRouteTable that match the filter
-		output, err := TgwGetAttachments(ctx, api, input)
+		output, err := ports.TgwGetAttachments(ctx, api, input)
 		if err != nil {
 			return err
 		}

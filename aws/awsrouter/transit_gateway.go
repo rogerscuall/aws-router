@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 //Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.
@@ -48,10 +49,10 @@ func (t *Tgw) Bytes() []byte {
 
 // UpdateRouteTables updates the field TgwRouteTables on a Tgw.
 // An error will stop the processing returning the error wrapped.
-func (t *Tgw) UpdateRouteTables(ctx context.Context, api AwsRouter) error {
+func (t *Tgw) UpdateRouteTables(ctx context.Context, api ports.AWSRouter) error {
 	// Update the Route Tables
-	inputTgwRouteTable := TgwRouteTableInputFilter([]string{t.ID})
-	resultTgwRouteTable, err := GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
+	inputTgwRouteTable := ports.TgwRouteTableInputFilter([]string{t.ID})
+	resultTgwRouteTable, err := ports.GetTgwRouteTables(context.TODO(), api, inputTgwRouteTable)
 	if err != nil {
 		return fmt.Errorf("error updating the route tables %w", err)
 	}
@@ -67,15 +68,15 @@ func (t *Tgw) UpdateRouteTables(ctx context.Context, api AwsRouter) error {
 // TODO: add testing and include race condition detection.
 //
 // Each Tgw has a list of TgwRouteTables, each RouteTable gets is own goroutine.
-func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api AwsRouter) error {
+func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api ports.AWSRouter) error {
 	var wg sync.WaitGroup
 	var err error
 	for _, tgwRouteTable := range t.RouteTables {
 		wg.Add(1)
 		go func(routeTable *TgwRouteTable) {
 			defer wg.Done()
-			inputTgwSearchRoutes := TgwSearchRoutesInputFilter(routeTable.ID)
-			resultTgwSearchRoutes, err := GetTgwRoutes(context.TODO(), api, inputTgwSearchRoutes)
+			inputTgwSearchRoutes := ports.TgwSearchRoutesInputFilter(routeTable.ID)
+			resultTgwSearchRoutes, err := ports.GetTgwRoutes(context.TODO(), api, inputTgwSearchRoutes)
 			if err != nil {
 				err = fmt.Errorf("error retrieve the table %s %w", routeTable.ID, err)
 			}
@@ -87,7 +88,7 @@ func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api AwsRouter) error {
 }
 
 // UpdateTgwRouteTablesAttachments updates the Attachments of a TgwRouteTable.
-func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api AwsRouter) error {
+func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWSRouter) error {
 	for _, tgwRouteTable := range t.RouteTables {
 		err := tgwRouteTable.UpdateAttachments(ctx, api)
 		if err != nil {
@@ -98,9 +99,9 @@ func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api AwsRouter
 }
 
 // GetAllTgws returns a list of all the Transit Gateways in the account for specific region
-func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
+func GetAllTgws(ctx context.Context, api ports.AWSRouter) ([]*Tgw, error) {
 	input := &ec2.DescribeTransitGatewaysInput{}
-	result, err := GetTgw(ctx, api, input)
+	result, err := ports.GetTgw(ctx, api, input)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
 	}
@@ -115,7 +116,7 @@ func GetAllTgws(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
 // The function will try to gather all the Route Tables and all the routes in the Route Tables.
 // The function will return an error if it fails to gather a Transit Gateway or a Route Table, but it will continue
 // if it fails to gather a route.
-func UpdateRouting(ctx context.Context, api AwsRouter) ([]*Tgw, error) {
+func UpdateRouting(ctx context.Context, api ports.AWSRouter) ([]*Tgw, error) {
 	tgws, err := GetAllTgws(ctx, api)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving Transit Gateways: %w", err)
