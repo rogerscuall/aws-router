@@ -75,7 +75,7 @@ type AttPath struct {
 	Path []*TgwAttachment
 
 	// A map of the attachments in the path, to avoid duplicates.
-	mapPath       map[string]struct{}
+	mapPath map[string]struct{}
 
 	// The source route table.
 	SrcRouteTable TgwRouteTable
@@ -84,10 +84,10 @@ type AttPath struct {
 	DstRouteTable TgwRouteTable
 
 	// The Transit Gateway of this path.
-	Tgw           *Tgw
+	Tgw *Tgw
 }
 
-// NewAttPath builds a AttPath from a aws TransitGatewayRoute type.
+// NewAttPath builds a AttPath.
 func NewAttPath() *AttPath {
 	return &AttPath{
 		Path:          make([]*TgwAttachment, 0),
