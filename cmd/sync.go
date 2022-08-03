@@ -25,12 +25,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.presidio.com/rgomez/aws-router/adapters/db"
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
 	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
@@ -55,9 +52,8 @@ var syncCmd = &cobra.Command{
 		defer dbAdapterTgw.CloseDbConnection()
 		defer dbAdapterTgwRouteTable.CloseDbConnection()
 		fmt.Println("Downloading routing information from AWS")
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		client := ec2.NewFromConfig(cfg)
-		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
+		ctx := context.TODO()
+		tgws, err := app.UpdateRouting(ctx)
 		fmt.Println("Saving routing information to DB")
 		for _, tgw := range tgws {
 			err = dbAdapterTgw.SetVal(tgw.ID, tgw.Bytes())

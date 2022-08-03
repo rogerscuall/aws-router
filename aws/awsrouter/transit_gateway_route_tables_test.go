@@ -358,22 +358,22 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:   "No Attachments",
+			name: "No Attachments",
 			fields: fields{
-					ID:   "rtb-0d7f9b0a",
-					Name: "rtb1",
-					Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[0],
-					Routes: []types.TransitGatewayRoute{
-						{
-							DestinationCidrBlock: aws.String("10.0.1.0/24"),
-							TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
-								{
-									ResourceId:   aws.String("tgw-0d7f9b0x"),
-									ResourceType: "vpc",
-								},
+				ID:   "rtb-0d7f9b0a",
+				Name: "rtb1",
+				Data: listDescribeTransitGatewayRouteTablesOutput.TransitGatewayRouteTables[0],
+				Routes: []types.TransitGatewayRoute{
+					{
+						DestinationCidrBlock: aws.String("10.0.1.0/24"),
+						TransitGatewayAttachments: []types.TransitGatewayRouteAttachment{
+							{
+								ResourceId:   aws.String("tgw-0d7f9b0x"),
+								ResourceType: "vpc",
 							},
-							Type: "propagated",
 						},
+						Type: "propagated",
+					},
 				},
 			},
 			args: args{
@@ -396,7 +396,7 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 				t.Errorf("TgwRouteTable.UpdateAttachments() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if len(tr.Attachments) < 1 {
-				t.Errorf("Number of attachment is less than 1 %v, wantErr %v",len(tr.Attachments) , tt.wantErr)
+				t.Errorf("Number of attachment is less than 1 %v, wantErr %v", len(tr.Attachments), tt.wantErr)
 			}
 		})
 	}

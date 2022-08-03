@@ -27,14 +27,14 @@ import (
 	"log"
 	"os"
 
-	"gitlab.presidio.com/rgomez/aws-router/aws/awsrouter"
-	"gitlab.presidio.com/rgomez/aws-router/aws/auth"
+	"gitlab.presidio.com/rgomez/aws-router/internal/application"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var app *application.Application
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,21 +44,11 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		defer func() {
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-		}()
-		fmt.Println("Downloading Routing Information...")
-		// Get the AWS credentials from the environment
-		client, err := auth.GetClient()
-
+		ctx := context.TODO()
+		tgws, err := app.UpdateRouting(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		tgws, err := awsrouter.UpdateRouting(context.TODO(), client)
 		for _, tgw := range tgws {
 			fmt.Printf("Transit Gateway Name: %s\n", tgw.Name)
 			if len(tgw.RouteTables) > 0 {
@@ -93,6 +83,12 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	app = application.NewApplication()
+	err := app.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 

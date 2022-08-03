@@ -81,7 +81,7 @@ func DrawTgwFull(tgw awsrouter.Tgw, folder fs.FileInfo) error {
 	if folder == nil || !folder.IsDir() {
 		return fmt.Errorf("folder is nil")
 	}
-	
+
 	// initial x and y coordinates
 	x, y := float64(100), float64(100)
 	dc := CreateTgwContext(tgw)

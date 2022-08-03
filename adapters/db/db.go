@@ -36,7 +36,6 @@ func (da Adapter) GetVal(key string) ([]byte, error) {
 	return val, nil
 }
 
-
 func (da Adapter) Sync() {
 	err := da.db.Sync()
 	if err != nil {

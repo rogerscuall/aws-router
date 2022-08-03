@@ -36,7 +36,7 @@ import (
 var excelCmd = &cobra.Command{
 	Use:   "excel",
 	Short: "Export all route tables to excel",
-	Long: `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
+	Long:  `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		defer func() {

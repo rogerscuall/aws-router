@@ -200,8 +200,8 @@ func TestAttPath_Walk(t *testing.T) {
 
 func TestAttPath_String(t *testing.T) {
 	type fields struct {
-		Path          []*TgwAttachment
-		MapPath       map[string]struct{}
+		Path    []*TgwAttachment
+		MapPath map[string]struct{}
 	}
 	tests := []struct {
 		name   string
@@ -214,26 +214,25 @@ func TestAttPath_String(t *testing.T) {
 				Path: []*TgwAttachment{
 					{ID: "1234"},
 				},
-		},
-			want: "1234",
-	},
-	{
-		name: "MultiHop",
-		fields: fields{
-			Path: []*TgwAttachment{
-				{ID: "1234"},
-				{ID: "5678"},
 			},
+			want: "1234",
 		},
-		want: "1234 -> 5678",
-	},
-
+		{
+			name: "MultiHop",
+			fields: fields{
+				Path: []*TgwAttachment{
+					{ID: "1234"},
+					{ID: "5678"},
+				},
+			},
+			want: "1234 -> 5678",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := AttPath{
-				Path:          tt.fields.Path,
-				MapPath:       tt.fields.MapPath,
+				Path:    tt.fields.Path,
+				MapPath: tt.fields.MapPath,
 			}
 			if got := attPath.String(); got != tt.want {
 				t.Errorf("AttPath.String() = %v, want %v", got, tt.want)
