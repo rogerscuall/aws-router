@@ -25,10 +25,6 @@ jobs:
         run: ./awsrouters
         env:
           AWS_REGION: us-east-1
-      - name: Running the root command
-        run: ./awsrouters
-        env:
-          AWS_REGION: us-east-1
       - name: Running a db sync command 
         env:
           AWS_REGION: us-east-1
