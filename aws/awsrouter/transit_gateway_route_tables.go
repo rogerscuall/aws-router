@@ -9,6 +9,7 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/fatih/color"
+	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 // TgwRouteTable holds the Route Table ID, a list of routes and other RouteTable info.
@@ -84,10 +85,10 @@ func newTgwRouteTable(t types.TransitGatewayRouteTable) *TgwRouteTable {
 }
 
 // Update the attachments of a TgwRouteTable.
-func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, api AwsRouter) error {
+func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, api ports.AWSRouter) error {
 	// get the attachments for the route table
-	input := TgwRouteTableAssociationInputFilter(t.ID)
-	attachments, err := GetTgwRouteTableAssociations(ctx, api, input)
+	input := ports.TgwRouteTableAssociationInputFilter(t.ID)
+	attachments, err := ports.GetTgwRouteTableAssociations(ctx, api, input)
 	if err != nil {
 		return err
 	}

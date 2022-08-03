@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"gitlab.presidio.com/rgomez/aws-router/ports"
 )
 
 func Test_newTgwAttachment(t *testing.T) {
@@ -170,7 +171,7 @@ func TestAttPath_Walk(t *testing.T) {
 	}
 	type args struct {
 		ctx context.Context
-		api AwsRouter
+		api ports.AWSRouter
 		src net.IP
 		dst net.IP
 	}
