@@ -12,9 +12,15 @@ import (
 
 // TgwAttachments holds the data of a Transit Gateway Attachment.
 type TgwAttachment struct {
-	ID         string
+	// The ID of the attachment.
+	ID string
+
+	// The ID of the resource where this attachment terminates.
 	ResourceID string
-	Type       string
+
+	// The type of the resource where this attachment terminates.
+	// Common values are: vpc, vpn, direct-connect ...
+	Type string
 }
 
 // newTgwAttach builds a TgwAttachment from a aws TransitGatewayRouteAttachment type.
@@ -62,12 +68,22 @@ func getDirectlyConnectedAttachmentFromTgwRoute(rts []TgwRouteTable) []*TgwAttac
 
 // AttPath is a list of TgwAttachments that represent the path from a source to a destination.
 // The first element is the source attachment, the last element is the destination attachment.
-// No two elements are the same.
+// There can be 2 or more attachments in the path, but 2 or 3 are common values.
+// No two elements are the same, because that would be a loop.
 type AttPath struct {
-	Path          []*TgwAttachment
-	MapPath       map[string]struct{}
+	// The list of attachments in the path, from source to destination.
+	Path []*TgwAttachment
+
+	// A map of the attachments in the path, to avoid duplicates.
+	mapPath       map[string]struct{}
+
+	// The source route table.
 	SrcRouteTable TgwRouteTable
+
+	// The destination route table.
 	DstRouteTable TgwRouteTable
+
+	// The Transit Gateway of this path.
 	Tgw           *Tgw
 }
 
@@ -75,7 +91,7 @@ type AttPath struct {
 func NewAttPath() *AttPath {
 	return &AttPath{
 		Path:          make([]*TgwAttachment, 0),
-		MapPath:       make(map[string]struct{}),
+		mapPath:       make(map[string]struct{}),
 		SrcRouteTable: TgwRouteTable{},
 		DstRouteTable: TgwRouteTable{},
 		Tgw:           &Tgw{},
@@ -84,7 +100,7 @@ func NewAttPath() *AttPath {
 
 // isAttachmentInPath returns true if the attachment is in the path.
 func (attPath AttPath) isAttachmentInPath(ID string) bool {
-	_, ok := attPath.MapPath[ID]
+	_, ok := attPath.mapPath[ID]
 	if ok {
 		return true
 	}
@@ -99,7 +115,7 @@ func (attPath *AttPath) addAttachmentToPath(att *TgwAttachment) error {
 		return ErrTgwAttachmetInPath
 	}
 	attPath.Path = append(attPath.Path, att)
-	attPath.MapPath[att.ID] = struct{}{}
+	attPath.mapPath[att.ID] = struct{}{}
 	return nil
 }
 

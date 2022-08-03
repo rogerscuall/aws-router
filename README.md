@@ -29,3 +29,53 @@ Credentials need to have permissions for:
 Is recommended to have allow access to all resources.
 
 This tool is used from the CLI, so test you have access before trying this tool for example with `aws ec2 describe-transit-gateways`. This tool will identify the default AWS credentials on the current session.
+
+## Architecture
+
+```mermaid
+classDiagram
+    class Tgw {
+        + ID string
+        + Name string
+        + RouteTables []*TgwRouteTable
+        + Data types.TransitGateway
+    }
+    class TgwRouteTable{
+        + ID string
+        + Name string
+        + Attachments []*TgwAttachment
+        + Routes []types.TransitGatewayRoute
+        + Data types.TransitGatewayRouteTable}
+    class TgwAttachment{
+        + ID string
+        + ResourceID string
+        + Type string
+    }
+    class AttPath{
+        + Path []*TgwAttachment
+        - mapPath map[string]struct
+        + SrcRouteTable TgwRouteTable
+        + DstRouteTable TgwRouteTable
+        + Tgw *Tgw
+    }
+```
+
+```mermaid
+classDiagram
+    Application *-- AWSRouter
+    class AWSRouter {
+        <<interface>>
+        + DescribeTransitGateways()
+        + DescribeTransitGatewayRouteTables()
+        + SearchTransitGatewayRoutes()
+        + GetTransitGatewayRouteTableAssociations()
+        + DescribeTransitGatewayAttachments()
+    }
+    class Application {
+        + RouterClient AWSRouter
+        + InfoLog      *log.Logger
+        + ErrorLog     *log.Logger
+        + Init()
+        + UpdateRouting()
+    }
+```

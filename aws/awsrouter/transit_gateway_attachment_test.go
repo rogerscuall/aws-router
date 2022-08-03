@@ -93,7 +93,7 @@ func TestAttPath_isAttachmentInPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := AttPath{
 				Path:          tt.fields.Path,
-				MapPath:       tt.fields.MapPath,
+				mapPath:       tt.fields.MapPath,
 				SrcRouteTable: tt.fields.SrcRouteTable,
 				DstRouteTable: tt.fields.DstRouteTable,
 				Tgw:           tt.fields.Tgw,
@@ -152,7 +152,7 @@ func TestAttPath_addAttachmentToPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := AttPath{
 				Path:    tt.fields.Path,
-				MapPath: tt.fields.MapPath,
+				mapPath: tt.fields.MapPath,
 			}
 			if err := attPath.addAttachmentToPath(tt.args.att); (err != nil) != tt.wantErr {
 				t.Errorf("AttPath.addAttachmentToPath() error = %v, wantErr %v", err, tt.wantErr)
@@ -187,7 +187,7 @@ func TestAttPath_Walk(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := &AttPath{
 				Path:          tt.fields.Path,
-				MapPath:       tt.fields.MapPath,
+				mapPath:       tt.fields.MapPath,
 				SrcRouteTable: tt.fields.SrcRouteTable,
 				DstRouteTable: tt.fields.DstRouteTable,
 				Tgw:           tt.fields.Tgw,
@@ -233,7 +233,7 @@ func TestAttPath_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			attPath := AttPath{
 				Path:    tt.fields.Path,
-				MapPath: tt.fields.MapPath,
+				mapPath: tt.fields.MapPath,
 			}
 			if got := attPath.String(); got != tt.want {
 				t.Errorf("AttPath.String() = %v, want %v", got, tt.want)
