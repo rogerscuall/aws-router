@@ -12,16 +12,16 @@ tasks:
       - go test -race -v ./...
   build:
     cmds:
-      - GOOS=darwin go build -o awsrouters *.go
+      - GOOS=darwin GOARCH=arm64 go build -o ./bin/mac_arm64/awsrouters *.go
   buildMacIntel:
     cmds:
-      - GOOS=darwin GOARCH=amd64 go build -o awsrouters-intel *.go
+      - GOOS=darwin GOARCH=amd64 go build -o ./bin/mac_amd64/awsrouters *.go
   buildwindows:
     cmds:
-      - GOOS=windows GOARCH=amd64 go build -o awsrouters.exe *.go
+      - GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/awsrouters.exe *.go
   buildlinux:
     cmds:
-      - GOOS=linux GOARCH=amd64 go build -o awsrouters-linux
+      - GOOS=linux GOARCH=amd64 go build -o ./bin/linux_amd64/awsrouters *.go
   buildall:
     deps:
       - build
