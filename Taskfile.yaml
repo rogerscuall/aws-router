@@ -26,6 +26,7 @@ tasks:
     deps:
       - build
       - buildwindows
+      - buildlinux
   docs:
     cmds:
       - echo "Open the browser and navigate to http://localhost:6060/docs"
