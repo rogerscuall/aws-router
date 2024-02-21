@@ -24,6 +24,13 @@ run/awsrouters/excel:
 	go run *.go excel
 
 
+## run/awsrouters/cleanup: run the cmd/api application
+.PHONY: run/awsrouters/cleanup
+run/awsrouters/cleanup:
+    @echo 'Cleaning up excel and csv files...'
+	rm -f csv/*.csv
+	rm -f excel/*.xlsx
+
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
