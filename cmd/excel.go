@@ -34,7 +34,8 @@ import (
 var excelCmd = &cobra.Command{
 	Use:   "excel",
 	Short: "Export all route tables to excel",
-	Long:  `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.`,
+	Long:  `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.
+By default all excel are stored on the folder excel. The folder has to exist.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := context.TODO()
@@ -44,8 +45,18 @@ var excelCmd = &cobra.Command{
 			}
 		}()
 		fmt.Println("Exporting AWS routing to Excel")
+		folderName := "excel"
 		tgws, err := app.UpdateRouting(ctx)
-		folder, err := os.Stat("excel")
+		var folder os.FileInfo
+		if folder, err = os.Stat(folderName); err != nil {
+			err = os.Mkdir(folderName, 0755)
+			if err != nil {
+				fmt.Println("Error creating folder:", err)
+				return // Exit if there's an error
+			}
+			fmt.Println("Folder created:", folderName)
+			folder, _ = os.Stat(folderName)
+		}
 		err = awsrouter.ExportTgwRoutesExcel(tgws, folder)
 		if err != nil {
 			fmt.Println(err)
