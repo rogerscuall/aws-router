@@ -38,9 +38,11 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 					f.SetCellValue(tgwRouteTable.Name, "B1", "State")
 					f.SetCellValue(tgwRouteTable.Name, "C1", "RouteType")
 					f.SetCellValue(tgwRouteTable.Name, "D1", "PrefixList")
+					f.SetCellValue(tgwRouteTable.Name, "E1", "AttachmentName")
 				}
 				state := fmt.Sprint(route.State)
 				routeType := fmt.Sprint(route.Type)
+				attachmentName := fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
 				var prefixListId string
 				if route.PrefixListId == nil {
 					prefixListId = "-"
@@ -52,6 +54,7 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 					state,
 					routeType,
 					prefixListId,
+					attachmentName,
 				}
 				f.SetSheetRow(tgwRouteTable.Name, "A"+fmt.Sprint(i+2), &row)
 			}
