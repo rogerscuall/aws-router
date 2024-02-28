@@ -44,7 +44,11 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 				routeType := fmt.Sprint(route.Type)
 				var attachmentName = "-"
 				if len(route.TransitGatewayAttachments) != 0 {
-					attachmentName = fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
+					attachmentID := fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
+					attachmentName = tgwRouteTable.GetAttachmentName(attachmentID)
+					if attachmentName == "" {
+						attachmentName = attachmentID
+					}
 				}
 				var prefixListId string
 				if route.PrefixListId == nil {
@@ -85,3 +89,6 @@ func ExportRouteTableRoutesCsv(w *csv.Writer, tgwrt TgwRouteTable) error {
 	}
 	return nil
 }
+
+
+// 
