@@ -21,6 +21,9 @@ type TgwAttachment struct {
 	// The type of the resource where this attachment terminates.
 	// Common values are: vpc, vpn, direct-connect ...
 	Type string
+
+	// The name of the TGW Attachment.
+	Name string
 }
 
 // newTgwAttach builds a TgwAttachment from a aws TransitGatewayRouteAttachment type.
