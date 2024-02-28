@@ -170,7 +170,7 @@ func (attPath *AttPath) Walk(ctx context.Context, api ports.AWSRouter, src, dst 
 		// Create a filter of type TgwAttachmentInputFilter
 		input := ports.TgwAttachmentInputFilter(filter)
 		// Get the list of TgwRouteTable that match the filter
-		output, err := ports.TgwGetAttachments(ctx, api, input)
+		output, err := ports.GetTgwAttachments(ctx, api, input)
 		if err != nil {
 			return err
 		}
