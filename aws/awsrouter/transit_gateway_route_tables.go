@@ -246,3 +246,14 @@ func (t *TgwRouteTable) PrintRoutesInTable() {
 	}
 	fmt.Println(table.String())
 }
+
+
+// GetAttachmentName returns the name of the attachment that has the given ID.
+func (t *TgwRouteTable) GetAttachmentName(attachmentID string) string {
+	for _, a := range t.Attachments {
+		if a.ID == attachmentID {
+			return a.Name
+		}
+	}
+	return ""
+}
