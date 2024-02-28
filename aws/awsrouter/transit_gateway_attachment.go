@@ -21,6 +21,9 @@ type TgwAttachment struct {
 	// The type of the resource where this attachment terminates.
 	// Common values are: vpc, vpn, direct-connect ...
 	Type string
+
+	// The name of the TGW Attachment.
+	Name string
 }
 
 // newTgwAttach builds a TgwAttachment from a aws TransitGatewayRouteAttachment type.
@@ -101,10 +104,7 @@ func NewAttPath() *AttPath {
 // isAttachmentInPath returns true if the attachment is in the path.
 func (attPath AttPath) isAttachmentInPath(ID string) bool {
 	_, ok := attPath.mapPath[ID]
-	if ok {
-		return true
-	}
-	return false
+	return ok
 }
 
 // addAttachmentToPath adds an attachment to the path.
@@ -155,7 +155,7 @@ func (attPath *AttPath) Walk(ctx context.Context, api ports.AWSRouter, src, dst 
 		// Add the next hop to the path
 		err = attPath.addAttachmentToPath(nextHopAtt)
 		if err != nil {
-			return fmt.Errorf("Attachment %s is already in the path", nextHopAtt.ID)
+			return fmt.Errorf("attachment %s is already in the path", nextHopAtt.ID)
 		}
 
 		// Find the route table associated to the attachment
@@ -167,7 +167,7 @@ func (attPath *AttPath) Walk(ctx context.Context, api ports.AWSRouter, src, dst 
 		// Create a filter of type TgwAttachmentInputFilter
 		input := ports.TgwAttachmentInputFilter(filter)
 		// Get the list of TgwRouteTable that match the filter
-		output, err := ports.TgwGetAttachments(ctx, api, input)
+		output, err := ports.GetTgwAttachments(ctx, api, input)
 		if err != nil {
 			return err
 		}

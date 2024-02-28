@@ -104,7 +104,6 @@ func (t *TgwRouteTable) UpdateAttachments(ctx context.Context, attachments *ec2.
 }
 
 // TgwRouteTableSelectionPriority select the best route table from a list of TgwRouteTables to the specific destination.
-//
 func TgwRouteTableSelectionPriority(rts []*TgwRouteTable, src net.IP) (*TgwRouteTable, error) {
 	var srcAttachment *TgwAttachment
 	// cfg, err := config.LoadDefaultConfig(context.TODO())
@@ -245,4 +244,14 @@ func (t *TgwRouteTable) PrintRoutesInTable() {
 		},
 	}
 	fmt.Println(table.String())
+}
+
+// GetAttachmentName returns the name of the attachment that has the given ID.
+func (t *TgwRouteTable) GetAttachmentName(attachmentID string) string {
+	for _, a := range t.Attachments {
+		if a.ID == attachmentID {
+			return a.Name
+		}
+	}
+	return ""
 }

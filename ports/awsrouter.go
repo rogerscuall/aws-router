@@ -92,7 +92,7 @@ func TgwSearchRoutesInputFilter(tgwRtID string, routeFilters ...types.Filter) *e
 	return input
 }
 
-//GetTgwRoutes returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
+// GetTgwRoutes returns a list of the Transit Gateway Routes that match the input filter for specific Route Table.
 func GetTgwRoutes(ctx context.Context, api AWSRouter, input *ec2.SearchTransitGatewayRoutesInput) (*ec2.SearchTransitGatewayRoutesOutput, error) {
 	return api.SearchTransitGatewayRoutes(ctx, input)
 }
@@ -131,7 +131,7 @@ func TgwAttachmentInputFilter(attachmentFilters ...types.Filter) *ec2.DescribeTr
 	return input
 }
 
-// TgwGetAttachments describe the configuration of the TGW Attachments.
-func TgwGetAttachments(ctx context.Context, api AWSRouter, input *ec2.DescribeTransitGatewayAttachmentsInput) (*ec2.DescribeTransitGatewayAttachmentsOutput, error) {
+// GetTgwAttachments describe the configuration of the TGW Attachments.
+func GetTgwAttachments(ctx context.Context, api AWSRouter, input *ec2.DescribeTransitGatewayAttachmentsInput) (*ec2.DescribeTransitGatewayAttachmentsOutput, error) {
 	return api.DescribeTransitGatewayAttachments(ctx, input)
 }
