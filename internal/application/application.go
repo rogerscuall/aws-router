@@ -50,7 +50,7 @@ func (app *Application) UpdateRouting(ctx context.Context) (tgws []*awsrouter.Tg
 	// Get all routes from all route tables
 	for _, tgw := range tgws {
 		tgw.UpdateTgwRoutes(ctx, app.RouterClient)
+		tgw.UpdateTgwRouteTablesAttachments(ctx, app.RouterClient)
 	}
-
 	return tgws, nil
 }
