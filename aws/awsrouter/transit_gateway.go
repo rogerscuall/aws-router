@@ -89,6 +89,8 @@ func (t *Tgw) UpdateTgwRoutes(ctx context.Context, api ports.AWSRouter) error {
 
 // UpdateTgwRouteTablesAttachments updates the Attachments of a TgwRouteTable.
 func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWSRouter) error {
+	tempAttachment := make(map[string]string)
+	var name string
 	for _, tgwRouteTable := range t.RouteTables {
 		input := ports.TgwRouteTableAssociationInputFilter(tgwRouteTable.ID)
 		result, err := ports.GetTgwRouteTableAssociations(ctx, api, input)
@@ -102,24 +104,28 @@ func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWS
 
 		// Update attachment names
 		for _, att := range tgwRouteTable.Attachments {
-			attInput := ec2.DescribeTransitGatewayAttachmentsInput{}
-			attInput.TransitGatewayAttachmentIds = []string{att.ID}
-			attOutput, err := ports.GetTgwAttachments(ctx, api, &attInput)
-			if err != nil {
-				return fmt.Errorf("error retrieving Transit Gateway Attachments: %w", err)
+			if _, ok := tempAttachment[att.ID]; !ok {
+				attInput := ec2.DescribeTransitGatewayAttachmentsInput{}
+				attInput.TransitGatewayAttachmentIds = []string{att.ID}
+				attOutput, err := ports.GetTgwAttachments(ctx, api, &attInput)
+				if err != nil {
+					return fmt.Errorf("error retrieving Transit Gateway Attachments: %w", err)
+				}
+				if len(attOutput.TransitGatewayAttachments) != 1 {
+					fmt.Print("there is more than one attachment with the same ID")
+				}
+				tags := attOutput.TransitGatewayAttachments[0].Tags
+				if len(tags) == 0 {
+					continue
+				}
+				name, err = GetNamesFromTags(tags)
+				if err != nil {
+					fmt.Println("error getting the name from the tags")
+					continue
+				}
+				tempAttachment[att.ID] = name
 			}
-			if len(attOutput.TransitGatewayAttachments) != 1 {
-				fmt.Print("there is more than one attachment with the same ID")
-			}
-			tags := attOutput.TransitGatewayAttachments[0].Tags
-			if len(tags) == 0 {
-				continue
-			}
-			name, err := GetNamesFromTags(tags)
-			if err == nil {
-				att.Name = name
-				fmt.Printf("Attachment %s has name %s\n", att.ID, att.Name)
-			}
+			att.Name = tempAttachment[att.ID]
 		}
 	}
 	return nil
