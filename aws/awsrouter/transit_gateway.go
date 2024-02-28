@@ -118,8 +118,7 @@ func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWS
 				if len(tags) == 0 {
 					continue
 				}
-				name, err = GetNamesFromTags(tags)
-				if err != nil {
+				if name, err = GetNamesFromTags(tags); err != nil {
 					fmt.Println("error getting the name from the tags")
 					continue
 				}
