@@ -27,7 +27,7 @@ run/awsrouters/excel:
 ## run/awsrouters/cleanup: run the cmd/api application
 .PHONY: run/awsrouters/cleanup
 run/awsrouters/cleanup:
-    @echo 'Cleaning up excel and csv files...'
+	@echo 'Cleaning up excel and csv files...'
 	rm -f csv/*.csv
 	rm -f excel/*.xlsx
 
@@ -43,13 +43,13 @@ audit:
 	go mod verify
 	@echo 'Formatting code...'
 	go fmt ./...
-	@echo 'Vetting code...'
-	go vet ./...
-	staticcheck ./...
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
 	@echo 'Testing code coverage...'
 	go test -cover ./...
+	@echo 'Vetting code...'
+	go vet ./...
+	staticcheck ./...
 
 ## vendor: tidy and vendor dependencies
 .PHONY: vendor

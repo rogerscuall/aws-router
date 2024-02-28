@@ -60,6 +60,9 @@ var syncCmd = &cobra.Command{
 		fmt.Println("Saving routing information to DB")
 		for _, tgw := range tgws {
 			err = dbAdapterTgw.SetVal(tgw.ID, tgw.Bytes())
+			if err != nil {
+				app.ErrorLog.Println(err)
+			}
 			for _, rt := range tgw.RouteTables {
 				err = dbAdapterTgwRouteTable.SetVal(rt.ID, rt.Bytes())
 			}

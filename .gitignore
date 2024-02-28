@@ -99,3 +99,4 @@ excel
 drawings/*.png
 aws/draw/testdata/*.png
 *.png
+.envrc

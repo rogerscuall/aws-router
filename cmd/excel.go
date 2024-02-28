@@ -34,7 +34,7 @@ import (
 var excelCmd = &cobra.Command{
 	Use:   "excel",
 	Short: "Export all route tables to excel",
-	Long:  `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.
+	Long: `Each Transit Gateway will have a separate Excel and each route table will have a separate sheet.
 By default all excel are stored on the folder excel. The folder has to exist.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error

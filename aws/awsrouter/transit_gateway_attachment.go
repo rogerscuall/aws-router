@@ -104,10 +104,7 @@ func NewAttPath() *AttPath {
 // isAttachmentInPath returns true if the attachment is in the path.
 func (attPath AttPath) isAttachmentInPath(ID string) bool {
 	_, ok := attPath.mapPath[ID]
-	if ok {
-		return true
-	}
-	return false
+	return ok
 }
 
 // addAttachmentToPath adds an attachment to the path.
@@ -158,7 +155,7 @@ func (attPath *AttPath) Walk(ctx context.Context, api ports.AWSRouter, src, dst 
 		// Add the next hop to the path
 		err = attPath.addAttachmentToPath(nextHopAtt)
 		if err != nil {
-			return fmt.Errorf("Attachment %s is already in the path", nextHopAtt.ID)
+			return fmt.Errorf("attachment %s is already in the path", nextHopAtt.ID)
 		}
 
 		// Find the route table associated to the attachment

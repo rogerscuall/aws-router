@@ -283,7 +283,7 @@ func TestTgwRouteTableSelectionPriority(t *testing.T) {
 	}
 }
 
-func TestfindBestRoutePrefix(t *testing.T) {
+func TestFindBestRoutePrefix(t *testing.T) {
 	net10 := net.ParseIP("10.0.1.10")
 	net192 := net.ParseIP("192.8.1.1")
 	_, sub10, _ := net.ParseCIDR("10.0.1.0/24")
@@ -382,7 +382,7 @@ func TestTgwRouteTable_UpdateAttachments(t *testing.T) {
 				&ec2.GetTransitGatewayRouteTableAssociationsOutput{
 					Associations: []types.TransitGatewayRouteTableAssociation{
 						{
-							ResourceId: aws.String("tgw-0d7f9b0x"),
+							ResourceId:                 aws.String("tgw-0d7f9b0x"),
 							ResourceType:               "vpc",
 							TransitGatewayAttachmentId: aws.String("tgw-attach-0d7f9b0x")},
 					},
