@@ -12,7 +12,7 @@ import (
 	"github.com/rogerscuall/aws-router/ports"
 )
 
-//Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.
+// Tgw is the main data-structure, holds ID, Name, a list of TgwRouteTable and other TGW info.
 // Represents a Transit Gateway in AWS.
 type Tgw struct {
 	ID          string
@@ -98,6 +98,28 @@ func (t *Tgw) UpdateTgwRouteTablesAttachments(ctx context.Context, api ports.AWS
 		err = tgwRouteTable.UpdateAttachments(ctx, result)
 		if err != nil {
 			return fmt.Errorf("error updating the route table %s %w", tgwRouteTable.ID, err)
+		}
+
+		// Update attachment names
+		for _, att := range tgwRouteTable.Attachments {
+			attInput := ec2.DescribeTransitGatewayAttachmentsInput{}
+			attInput.TransitGatewayAttachmentIds = []string{att.ID}
+			attOutput, err := ports.GetTgwAttachments(ctx, api, &attInput)
+			if err != nil {
+				return fmt.Errorf("error retrieving Transit Gateway Attachments: %w", err)
+			}
+			if len(attOutput.TransitGatewayAttachments) != 1 {
+				fmt.Print("there is more than one attachment with the same ID")
+			}
+			tags := attOutput.TransitGatewayAttachments[0].Tags
+			if len(tags) == 0 {
+				continue
+			}
+			name, err := GetNamesFromTags(tags)
+			if err == nil {
+				att.Name = name
+				fmt.Printf("Attachment %s has name %s\n", att.ID, att.Name)
+			}
 		}
 	}
 	return nil
