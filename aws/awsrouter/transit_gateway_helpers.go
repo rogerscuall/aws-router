@@ -48,6 +48,7 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 				}
 				var attachmentName = "-"
 				if len(route.TransitGatewayAttachments) != 0 {
+					fmt.Println("att len:", len(route.TransitGatewayAttachments))
 					attachmentID := fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
 					attachmentName = tgwRouteTable.GetAttachmentName(attachmentID)
 					if attachmentName == "" {
