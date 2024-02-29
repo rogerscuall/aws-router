@@ -35,12 +35,14 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 			sheet := f.NewSheet(tgwRouteTable.Name)
 			for _, attachment := range tgwRouteTable.Attachments {
 				if _, ok := attachMap[attachment.ID]; !ok {
-					attachMap[attachment.ID] = attachment.Name
+					if attachment.Name != "" {
+						attachMap[attachment.ID] = attachment.Name
+					}
 				}
 			}
 			fmt.Println("The following attachment name where found:")
-			for _, attachmentName := range attachMap {
-				fmt.Printf("\t %v\n", attachmentName)
+			for key, value := range attachMap {
+				fmt.Printf("\t %v->%v\n", key, value)
 			}
 			for i, route := range tgwRouteTable.Routes {
 				// Only for the header
@@ -60,8 +62,8 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 				// }
 				var attachmentName = "-"
 				if len(route.TransitGatewayAttachments) != 0 {
-					//fmt.Println("att len:", len(route.TransitGatewayAttachments))
 					attachmentID := fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
+					fmt.Println("attachment id to find:", attachmentID)
 					name, ok := attachMap[attachmentID]
 					if ok {
 						attachmentName = name
