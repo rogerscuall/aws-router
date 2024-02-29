@@ -42,10 +42,10 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 				}
 				state := fmt.Sprint(route.State)
 				routeType := fmt.Sprint(route.Type)
-				for _, attachment := range tgwRouteTable.Attachments {
-					fmt.Println("attachment id:", attachment.ID)
-					fmt.Println("attachment name:", attachment.Name)
-				}
+				// for _, attachment := range tgwRouteTable.Attachments {
+				// 	fmt.Println("attachment id:", attachment.ID)
+				// 	fmt.Println("attachment name:", attachment.Name)
+				// }
 				var attachmentName = "-"
 				if len(route.TransitGatewayAttachments) != 0 {
 					fmt.Println("att len:", len(route.TransitGatewayAttachments))
