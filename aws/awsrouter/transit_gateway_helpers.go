@@ -27,8 +27,24 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 	}
 	folderName := folder.Name()
 	for _, tgw := range tgws {
+		attachMap := make(map[string]string)
+		fmt.Println("Transit Gateway Name:", tgw.Name)
 		f := excelize.NewFile()
 		for _, tgwRouteTable := range tgw.RouteTables {
+			for _, attachment := range tgwRouteTable.Attachments {
+				if _, ok := attachMap[attachment.ID]; !ok {
+					if attachment.Name != "" {
+						attachMap[attachment.ID] = attachment.Name
+					}
+				}
+			}
+		}
+		fmt.Println("The following attachment name where found in TGW:", tgw.Name)
+		for key, value := range attachMap {
+			fmt.Printf("\t %v->%v\n", key, value)
+		}
+		for _, tgwRouteTable := range tgw.RouteTables {
+			fmt.Println("Route Table Name:", tgwRouteTable.Name)
 			sheet := f.NewSheet(tgwRouteTable.Name)
 			for i, route := range tgwRouteTable.Routes {
 				// Only for the header
@@ -42,11 +58,18 @@ func ExportTgwRoutesExcel(tgws []*Tgw, folder fs.FileInfo) error {
 				}
 				state := fmt.Sprint(route.State)
 				routeType := fmt.Sprint(route.Type)
-				var attachmentName = "-"
+				// for _, attachment := range tgwRouteTable.Attachments {
+				// 	fmt.Println("attachment id:", attachment.ID)
+				// 	fmt.Println("attachment name:", attachment.Name)
+				// }
+				var attachmentName string
 				if len(route.TransitGatewayAttachments) != 0 {
 					attachmentID := fmt.Sprint(*route.TransitGatewayAttachments[0].TransitGatewayAttachmentId)
-					attachmentName = tgwRouteTable.GetAttachmentName(attachmentID)
-					if attachmentName == "" {
+					fmt.Println("attachment id to find:", attachmentID)
+					name, ok := attachMap[attachmentID]
+					if ok {
+						attachmentName = name
+					} else {
 						attachmentName = attachmentID
 					}
 				}
